@@ -1,0 +1,44 @@
+<Grid Width="150" Height="150">
+  <Grid.Resources>
+    <ControlTemplate x:Key="VerticalScrollBarTemplate"
+                     TargetType="ScrollBar">
+      <Grid>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="15"/>
+          <RowDefinition Height="*"/>
+          <RowDefinition Height="15"/>
+        </Grid.RowDefinitions>
+ 
+        <RepeatButton Command="ScrollBar.LineUpCommand"
+                      Background="LightBlue" />
+          <Track Grid.Row="1" IsDirectionReversed="True">
+            <Track.DecreaseRepeatButton>
+              <RepeatButton Command="ScrollBar.PageUpCommand"
+                            Background="Red" />
+            </Track.DecreaseRepeatButton>
+            <Track.Thumb>
+              <Thumb Background="Blue" />
+            </Track.Thumb>
+            <Track.IncreaseRepeatButton>
+              <RepeatButton Command="ScrollBar.PageDownCommand"
+                            Background="Green" />
+            </Track.IncreaseRepeatButton>
+          </Track>
+        <RepeatButton Command="ScrollBar.LineDownCommand"
+                      Background="LightPink" Grid.Row="2" />
+      </Grid>
+    </ControlTemplate>
+ 
+    <Style TargetType="ScrollBar">
+      <Style.Triggers>
+        <Trigger Property="Orientation" Value="Vertical">
+          <Setter Property="Template"
+            Value="{StaticResource VerticalScrollBarTemplate}" />
+        </Trigger>
+      </Style.Triggers>
+    </Style>
+  </Grid.Resources>
+  <ScrollViewer HorizontalScrollBarVisibility="Visible">
+    <Ellipse Width="500" Height="500" Fill="Gray" />
+  </ScrollViewer>
+</Grid>

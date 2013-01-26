@@ -1,0 +1,97 @@
+﻿<Application x:Class="SkyPhotoSharing.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:SkyPhotoSharing"
+             xmlns:properties="clr-namespace:SkyPhotoSharing.Properties"
+             Startup="Application_Startup"
+             StartupUri="MainWindow.xaml"
+             ShutdownMode="OnMainWindowClose" >
+    <Application.Resources>
+        <properties:Resources x:Key="Resources" />
+        <BitmapImage x:Key="CloseIcon" UriSource="Graphics\PhotoClose.png" />
+        <BitmapImage x:Key="AddUserIcon" UriSource="Graphics\AddUser.png" />
+        <BitmapImage x:Key="SaveIcon" UriSource="Graphics\SavePicture.png" />
+        <BitmapImage x:Key="ResizeOriginalIcon" UriSource="Graphics\ResizeOriginal.png" />
+        <BitmapImage x:Key="ResizeToFitIcon" UriSource="Graphics\ResizeFit.png" />
+        <BitmapImage x:Key="Separator" UriSource="Graphics\Separator.png" />
+        <Color x:Key="Silver" A="255"  R="127"  G="127" B="127" />
+        <Color x:Key="Black" A="255"  R="0"  G="0" B="0" />
+        <!--各種コントロール用Buttonのスタイル-->
+        <ControlTemplate x:Key="DefaultFlatButton" TargetType="Button">
+            <Grid>
+                <Border CornerRadius="0" BorderThickness="1,0,0,1" BorderBrush="DarkBlue">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                            <GradientStop Color="LightSteelBlue" Offset="0.0"/>
+                            <GradientStop Color="DarkBlue" Offset="0.5"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <Image Width="20" Height="20" Source="{TemplateBinding Content}" Opacity="1.0"/>
+                </Border>
+            </Grid>
+        </ControlTemplate>
+        <ControlTemplate x:Key="FocusedFlatButton" TargetType="Button">
+            <Grid>
+                <Border CornerRadius="0" BorderThickness="1,0,0,1" BorderBrush="DarkBlue">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                            <GradientStop Color="PowderBlue" Offset="0.0"/>
+                            <GradientStop Color="DarkBlue" Offset="1.0"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                </Border>
+                <Image Width="20" Height="20" Source="{TemplateBinding Content}" Opacity="1.0">
+                    <Image.BitmapEffect>
+                        <OuterGlowBitmapEffect GlowColor="White" GlowSize="3" />
+                    </Image.BitmapEffect>
+                </Image>
+            </Grid>
+        </ControlTemplate>
+        <ControlTemplate x:Key="ClickedFlatButton"  TargetType="Button">
+            <Grid>
+                <Border CornerRadius="0" BorderThickness="2,1,1,2" BorderBrush="DarkBlue">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                            <GradientStop Color="PowderBlue" Offset="0.0"/>
+                            <GradientStop Color="DarkBlue" Offset="1.0"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                </Border>
+                <Image Width="18" Height="18" Source="{TemplateBinding Content}"  Opacity="1.0"/>
+            </Grid>
+        </ControlTemplate>
+        <ControlTemplate x:Key="DisableFlatButton" TargetType="Button">
+            <Grid>
+                <Border CornerRadius="0" BorderThickness="1,0,0,1" BorderBrush="DarkBlue">
+                    <Border.Background>
+                        <SolidColorBrush Color="DarkBlue"/>
+                    </Border.Background>
+                    <Image Width="20" Height="20" Source="{TemplateBinding Content}" Opacity="0.3"/>
+                </Border>
+            </Grid>
+        </ControlTemplate>
+        <Style x:Key="FlatButton" TargetType="Button">
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Width" Value="22" />
+            <Setter Property="Height" Value="20" />
+            <Setter Property="Margin" Value="1,0,0,1" />
+            <Setter Property="Padding" Value="1,0,0,1" />
+            <Setter Property="Template" Value="{StaticResource DefaultFlatButton}"/>
+            <Style.Triggers>
+                <Trigger  Property="IsMouseOver" Value="true">
+                    <Setter Property="Template" Value="{StaticResource FocusedFlatButton}"/>
+                </Trigger>
+                <Trigger  Property="IsFocused" Value="true">
+                    <Setter Property="Template" Value="{StaticResource FocusedFlatButton}"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="true">
+                    <Setter Property="BorderBrush" Value="Black" />
+                    <Setter Property="Template" Value="{StaticResource ClickedFlatButton}" />
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Template" Value="{StaticResource DisableFlatButton}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Application.Resources>
+</Application>
