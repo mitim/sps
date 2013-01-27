@@ -22,6 +22,8 @@ namespace SkyPhotoSharing
         public Rect WindowState { get { return new Rect(WindowLeft, WindowTop, WindowWidth, WindowHeight); } }
         public string SaveFolder { get; set; }
         public bool AutoSave { get; set; }
+        public bool AutoSelect { get; set; }
+        public bool ReflectOriginalTimes { get; set; }
         public double WindowLeft { get; set; }
         public double WindowTop { get; set; }
         public double WindowWidth { get; set; }
@@ -66,7 +68,7 @@ namespace SkyPhotoSharing
         {
             string d = System.IO.Path.GetDirectoryName(RegistoryJson);
             if(!Directory.Exists(d)) Directory.CreateDirectory(d);
-            File.WriteAllText(RegistoryJson, JsonConvert.SerializeObject(this));
+            File.WriteAllText(RegistoryJson, JsonConvert.SerializeObject(this, Formatting.Indented));
         }
     }
 }

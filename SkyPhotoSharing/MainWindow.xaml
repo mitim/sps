@@ -22,7 +22,7 @@
             <DataTemplate  x:Key="ThumbnailItem">
                 <Grid Width="70" Height="70">
                     <Grid Name="ThumbnailGrid"  Width="70" Height="70">
-                        <Image Name="Thumbnail" Margin="10,20,10,0" Width="40" Height="40"  Source="{Binding Image}" Stretch="UniformToFill"/>
+                        <Image Name="Thumbnail" Margin="10,20,10,0" Width="40" Height="40"  Source="{Binding Image}" Stretch="UniformToFill" GotFocus="OnThumbnailClick" />
                         <Grid.Background>
                             <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
                                 <GradientStop Color="Black" Offset="0.0"/>
@@ -130,7 +130,7 @@
                      Style="{StaticResource ThumbnailBox}"
                      IsSynchronizedWithCurrentItem="True" 
                      ItemTemplate="{StaticResource ThumbnailItem}"
-                     ItemsSource="{Binding Path=Photos, Mode=OneWay}" 
+                     ItemsSource="{Binding Path=Photos, Mode=OneWay}"
                      SelectionChanged="OnThumbnailSelect">
                 <ListBox.ItemContainerStyle>
                     <Style TargetType="ListBoxItem">
@@ -138,6 +138,7 @@
                         <Setter Property="Padding" Value="0"/>
                         <Setter Property="IsSelected"
                                 Value="{Binding Path=DataContext.IsSelected, RelativeSource={RelativeSource Mode=Self}}"/>
+                        <EventSetter Event="GotFocus" Handler="OnThumbnailClick" />
                     </Style>
                 </ListBox.ItemContainerStyle>
             </ListBox>
@@ -204,7 +205,7 @@
                     <ListBox.DataContext>
                         <local:SharingEnlisters />
                     </ListBox.DataContext>
-                </ListBox>
+                 </ListBox>
             </StackPanel>
             <StackPanel Grid.Column="1" Grid.Row="0" HorizontalAlignment="Right" ScrollViewer.VerticalScrollBarVisibility="Disabled" FlowDirection="RightToLeft" Orientation="Horizontal">
                 <Button Name="OriginalSizeButton" 

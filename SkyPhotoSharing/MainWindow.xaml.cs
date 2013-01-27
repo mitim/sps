@@ -28,6 +28,7 @@ namespace SkyPhotoSharing
         {
             ViewWindow.Cursor = HandOpenCursor;
             Thumbnails.ItemContainerGenerator.ItemsChanged += OnThumbnailsUpdated;
+            SkypeConnection.Instance.SetEventOnOnRecievePostcard(SkypePostcard.RAISE_SELECT_FILE, OnThumbnailSelectByOtherUser);
         }
 
         private void OnClosing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -75,12 +76,30 @@ namespace SkyPhotoSharing
 
         #region サムネイル操作
 
-        #region 画像選択時のスクロール位置決定
+
+        #region 画像選択時のシェアリング
+
+        private void OnThumbnailClick(object sender, RoutedEventArgs e)
+        {
+            if (Configuration.Instance.AutoSelect != false) return;
+            SkypeConnection.Instance.BloadcastPostcard(SkypePostcard.CreateRaiseSelectFileCard(Thumbnails.Items.CurrentItem as Photo));
+            e.Handled = true;
+        }
+
+        #endregion
+
+        #region 画像選択時のスクロール位置決定(シェアユーザによる選択を含む)
 
         private void OnThumbnailSelect(object sender, SelectionChangedEventArgs e)
         {
             PhotoList.UpdateControlFlags();
             Thumbnails.ScrollIntoView(Thumbnails.Items.CurrentItem);
+        }
+
+        private void OnThumbnailSelectByOtherUser(SkypePostcard card)
+        {
+            var p = PhotoList.GetSameItem(card.Message as SkypeMessageUniqueFile);
+            Thumbnails.Items.MoveCurrentTo(p);
         }
 
         #endregion
@@ -91,6 +110,7 @@ namespace SkyPhotoSharing
         {
             int i = Thumbnails.Items.CurrentPosition;
             RemovePhoto();
+            e.Handled = true;
 
             if (Thumbnails.Items.Count <= i)
             {
@@ -98,6 +118,7 @@ namespace SkyPhotoSharing
             }
             else if (0 < i)
             {
+                log.Debug(Thumbnails.Items.GetItemAt(i).GetType().ToString());
                 Thumbnails.Items.MoveCurrentTo(Thumbnails.Items.GetItemAt(i));
             }
             else
@@ -113,7 +134,11 @@ namespace SkyPhotoSharing
         private int _preUpdateCount = 0;
         void OnThumbnailsUpdated(object sender, ItemsChangedEventArgs e)
         {
-            if (_preUpdateCount < Thumbnails.Items.Count) Thumbnails.Items.MoveCurrentToLast();
+            if (_preUpdateCount < Thumbnails.Items.Count)
+            {
+                PhotoList.Last.IsSelected = true;
+                Thumbnails.Items.MoveCurrentToLast();
+            }
             _preUpdateCount = Thumbnails.Items.Count;
         }
 

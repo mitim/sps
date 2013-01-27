@@ -145,6 +145,16 @@ namespace SkyPhotoSharing
             return true;
         }
 
+        public bool IsSame(SkypeMessageUniqueFile f)
+        {
+            if (!FileName.Equals(f.FileName)) return false;
+            if (!CreateTime.Equals(f.CreateTime)) return false;
+            if (!UpdateTime.Equals(f.UpdateTime)) return false;
+            if (Image.StreamSource.Length != f.Size) return false;
+            return true;
+        }
+
+
         public void Save()
         {
             if (!CanSave) return;

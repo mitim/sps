@@ -89,6 +89,7 @@
     <Compile Include="CultureResources.cs" />
     <Compile Include="FileRecieveException.cs" />
     <Compile Include="FileSendException.cs" />
+    <Compile Include="ISkypePostcardMessage.cs" />
     <Compile Include="SelectableUsers.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="Enlister.cs" />
@@ -99,6 +100,8 @@
     <Compile Include="SkypeDelivery.cs" />
     <Compile Include="Enlisters.cs" />
     <Compile Include="ConfigEdit.cs" />
+    <Compile Include="SkypeMessageUniqueFile.cs" />
+    <Compile Include="SkypePostcard.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

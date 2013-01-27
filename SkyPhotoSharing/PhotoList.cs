@@ -102,6 +102,15 @@ namespace SkyPhotoSharing
             return false;
         }
 
+        public Photo GetSameItem(SkypeMessageUniqueFile file)
+        {
+            foreach (var p in _photos)
+            {
+                if (p.IsSame(file)) return p;
+            }
+            return null;
+        }
+
         public void Add(Photo item)
         {
             if (item == null) return;
@@ -152,6 +161,11 @@ namespace SkyPhotoSharing
         public static void AddFromOnline(Photo photo)
         {
             _instance.Add(photo);
+        }
+
+        public Photo Last
+        {
+            get { return _photos.Last(); }
         }
 
         private void AidAutoSave(Photo item)

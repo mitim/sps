@@ -7,6 +7,9 @@ using System.Threading;
 
 namespace SkyPhotoSharing
 {
+
+    delegate void Event_OnRecievePostcard(SkypePostcard card);
+
     class SkypeConnection
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
@@ -38,7 +41,7 @@ namespace SkyPhotoSharing
             get
             {
                 IList<User> l = new List<User>();
-                foreach (User u in _skype.Friends)
+                foreach (User u in Skype.Friends)
                 {
                     if (u.OnlineStatus == TOnlineStatus.olsOffline || u.OnlineStatus == TOnlineStatus.olsSkypeOut || u.OnlineStatus == TOnlineStatus.olsUnknown)
                     {
@@ -53,14 +56,14 @@ namespace SkyPhotoSharing
         private SkypeConnection()
         {
             log.Debug("Connection create start.");
-            if (_skype.Client.IsRunning) return;
-            _skype.Client.Start();
+            if (Skype.Client.IsRunning) return;
+            Skype.Client.Start();
         }
 
         public void WaitSkypeRunning()
         {
             log.Debug("Wait for Skype.");
-            while (!_skype.Client.IsRunning)
+            while (!Skype.Client.IsRunning)
             {
                 Thread.Sleep(100);
             }
@@ -86,17 +89,35 @@ namespace SkyPhotoSharing
             GetConnectedStream(partner.Handle).Write(data);
         }
 
+        public void PostChatMessage(string handle, string message)
+        {
+            Skype.SendMessage(handle, Properties.Resources.CHAT_HEAD + message);
+        }
+
+        public void BloadcastPostcard(SkypePostcard card)
+        {
+            SkyApp.SendDatagram(card.Serialize());
+        }
+
+        private Dictionary<string, Event_OnRecievePostcard> _postcardEvents = new Dictionary<string, Event_OnRecievePostcard>();
+        public void SetEventOnOnRecievePostcard(string command, Event_OnRecievePostcard evnt)
+        {
+            if (_postcardEvents.ContainsKey(command))
+            {
+                _postcardEvents[command] += evnt;
+            }
+            else
+            {
+                _postcardEvents.Add(command, evnt);
+            }
+        }
+
         private const string UNKNOWN = "<<Unknown User>>";
         public static string GetViewableName(User user) {
             if (!string.IsNullOrEmpty(user.FullName)) return user.FullName;
             if (!string.IsNullOrEmpty(user.DisplayName)) return user.DisplayName;
             if (!string.IsNullOrEmpty(user.Handle)) return user.Handle;
             return UNKNOWN;
-        }
-
-        public void PostChatMessage(string handle, string message)
-        {
-            _skype.SendMessage(handle, Properties.Resources.CHAT_HEAD + message);
         }
 
         private ApplicationStream GetConnectedStream(string handle)
@@ -135,7 +156,7 @@ namespace SkyPhotoSharing
                     var u = ParseHandle(s.Handle);
                     if (!Enlisters.Instance.IsExistEnlister(u))
                     {
-                        Enlisters.Instance.RaiseConnected(_skype.User[u]);
+                        Enlisters.Instance.RaiseConnected(Skype.User[u]);
                     }
                 }
                 log.Debug(app.Name + " on streams :" + v);
@@ -164,7 +185,10 @@ namespace SkyPhotoSharing
 
         private void OnApplicationDatagram(Application app, ApplicationStream stream, string data)
         {
-            log.Debug(app.Name + " on datagram. stream:" + stream.Handle + " data:[" + data + "]"); 
+            log.Debug(app.Name + " on datagram. stream:" + stream.Handle + " data:[" + data + "]");
+            var p = SkypePostcard.Deserialize(data);
+            _postcardEvents[p.Command](p);
+
         }
 
         private void OnSkypeError(ICommand command, int code, string description)
