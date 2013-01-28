@@ -8,15 +8,15 @@ using System.IO;
 namespace SkyPhotoSharing
 {
 
-    class PhotoList : INotifyPropertyChanged
+    class BindablePhotoList : INotifyPropertyChanged
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         private BindingList<Photo> _photos = new BindingList<Photo>();
 
-        private static PhotoList _instance;
+        private static BindablePhotoList _instance;
 
-        public PhotoList()
+        public BindablePhotoList()
         {
             PropertyChanged += (sender, e) => { };
             _instance = this;
@@ -104,6 +104,7 @@ namespace SkyPhotoSharing
 
         public Photo GetSameItem(SkypeMessageUniqueFile file)
         {
+            if (file == null) return null;
             foreach (var p in _photos)
             {
                 if (p.IsSame(file)) return p;

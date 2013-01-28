@@ -8,7 +8,7 @@ using SKYPE4COMLib;
 
 namespace SkyPhotoSharing
 {
-    class SelectableUsers : INotifyPropertyChanged
+    class BindableFriens : INotifyPropertyChanged
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
@@ -23,7 +23,7 @@ namespace SkyPhotoSharing
             } 
         }
 
-        public SelectableUsers() 
+        public BindableFriens() 
         {
             Reflesh();
             log.Debug("SelectableUsers create. size:" + List.Count);

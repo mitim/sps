@@ -135,6 +135,12 @@
   <data name="ERROR_FILE_CANT_SEND" xml:space="preserve">
     <value>画像'{0}'を'{1}'さんに送信できませんでした。</value>
   </data>
+  <data name="ERROR_FILE_TRANSFER_DISCONNECT" xml:space="preserve">
+    <value>{0}さんとのファイル転送中に接続が切れました。</value>
+  </data>
+  <data name="ERROR_FILE_TRANSFER_TIMEOUT" xml:space="preserve">
+    <value>{0}さんとのファイル転送({1})が途中でタイムアウトしました。</value>
+  </data>
   <data name="MESSAGE_ERROR_OCCURRED_CAPTION" xml:space="preserve">
     <value>おおっと！:{0}</value>
   </data>

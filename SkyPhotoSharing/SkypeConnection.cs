@@ -80,13 +80,15 @@ namespace SkyPhotoSharing
         public void Disconnect(Enlister partner)
         {
             log.Debug("Disconnect at user. :" + partner.Handle);
-            GetConnectedStream(partner.Handle).Disconnect();
+            var c = GetConnectingStream(partner.Handle);
+            if (c == null) return;
+            c.Disconnect();
         }
 
         public void WritePacket(string data, Enlister partner)
         {
             log.Debug("WritePacket to user. :" + partner.Handle + " data-length:" + data.Length);
-            GetConnectedStream(partner.Handle).Write(data);
+            GetConnectingStream(partner.Handle).Write(data);
         }
 
         public void PostChatMessage(string handle, string message)
@@ -97,6 +99,16 @@ namespace SkyPhotoSharing
         public void BloadcastPostcard(SkypePostcard card)
         {
             SkyApp.SendDatagram(card.Serialize());
+        }
+
+        public HashSet<string> GetConnectingUserhandles()
+        {
+            var l = new HashSet<String>();
+            foreach (ApplicationStream s in SkyApp.Streams)
+            {
+                l.Add(ParseHandle(s.Handle));
+            }
+            return l;
         }
 
         private Dictionary<string, Event_OnRecievePostcard> _postcardEvents = new Dictionary<string, Event_OnRecievePostcard>();
@@ -120,7 +132,7 @@ namespace SkyPhotoSharing
             return UNKNOWN;
         }
 
-        private ApplicationStream GetConnectedStream(string handle)
+        private ApplicationStream GetConnectingStream(string handle)
         {
             foreach (ApplicationStream s in SkyApp.Streams)
             {

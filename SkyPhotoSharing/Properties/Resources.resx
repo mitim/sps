@@ -135,6 +135,12 @@
   <data name="ERROR_FILE_CANT_SEND" xml:space="preserve">
     <value>The file '{0}' can't send to user'{1}'.</value>
   </data>
+  <data name="ERROR_FILE_TRANSFER_DISCONNECT" xml:space="preserve">
+    <value>File transfer with {0} was already disconnected.</value>
+  </data>
+  <data name="ERROR_FILE_TRANSFER_TIMEOUT" xml:space="preserve">
+    <value>File {1} transfer with {0} was timeout failed. </value>
+  </data>
   <data name="MESSAGE_ERROR_OCCURRED_CAPTION" xml:space="preserve">
     <value>Oops!!: {0}</value>
   </data>

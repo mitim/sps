@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using SKYPE4COMLib;
 using System.Threading.Tasks;
+using System.Windows.Threading;
 
 namespace SkyPhotoSharing
 {
@@ -12,12 +13,22 @@ namespace SkyPhotoSharing
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
+        private DispatcherTimer _checker = new DispatcherTimer();
+
         public Enlister Owner { protected set; get; }
         private BindingList<Enlister> _enlisters = new BindingList<Enlister>();
         public BindingList<Enlister> ConnectedList { get { return _enlisters; } }
 
         private static Enlisters _instance = new Enlisters();
         public static Enlisters Instance{ get{return _instance;}}
+
+        protected Enlisters() 
+        {
+            Owner = Enlister.Owner;
+            log.Debug(Owner.Handle + ":" +Owner.Name + " Color:" + Owner.Color.ToString());
+            StartChecker();
+
+        }
         
         public bool IsExistEnlister(string handle)
         {
@@ -31,12 +42,6 @@ namespace SkyPhotoSharing
                 if (e.Handle == handle) return e;
             }
             return null;
-        }
-
-        protected Enlisters() 
-        {
-            Owner = Enlister.Owner;
-            log.Debug(Owner.Handle + ":" +Owner.Name + " Color:" + Owner.Color.ToString());
         }
 
         public void ConnectTo(User usr)
@@ -78,6 +83,27 @@ namespace SkyPhotoSharing
         private void RaiseDisconnect(Enlister en)
         {
             ConnectedList.Remove(en);
+        }
+
+        private void StartChecker()
+        {
+            _checker.Interval = TimeSpan.FromSeconds(30);
+            _checker.Tick += OnCheckConnection;
+            _checker.Start();
+        }
+
+        private void OnCheckConnection(object sender, EventArgs e)
+        {
+            if (_enlisters.Count <= 0) return;
+            var ex = SkypeConnection.Instance.GetConnectingUserhandles();
+            for (var i = _enlisters.Count-1; -1 < i; i--)
+            {
+                var en = _enlisters[i];
+                if (ex.Contains(en.Handle)) continue;
+                en.Close();
+                _enlisters.Remove(en);
+            }
+
         }
     }
 }

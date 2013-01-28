@@ -86,22 +86,25 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="FileTimeoutException.cs" />
     <Compile Include="CultureResources.cs" />
     <Compile Include="FileRecieveException.cs" />
     <Compile Include="FileSendException.cs" />
+    <Compile Include="FileTransactionException.cs" />
     <Compile Include="ISkypePostcardMessage.cs" />
-    <Compile Include="SelectableUsers.cs" />
+    <Compile Include="BindableFriens.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="Enlister.cs" />
     <Compile Include="SkypeCargo.cs" />
-    <Compile Include="SharingEnlisters.cs" />
+    <Compile Include="BindableEnlisters.cs" />
     <Compile Include="SkypeApiException.cs" />
     <Compile Include="SkypeConnection.cs" />
     <Compile Include="SkypeDelivery.cs" />
     <Compile Include="Enlisters.cs" />
-    <Compile Include="ConfigEdit.cs" />
+    <Compile Include="BindableConfig.cs" />
     <Compile Include="SkypeMessageUniqueFile.cs" />
     <Compile Include="SkypePostcard.cs" />
+    <Compile Include="TransactionDisconnectException.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -117,7 +120,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Photo.cs" />
-    <Compile Include="PhotoList.cs" />
+    <Compile Include="BindablePhotoList.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

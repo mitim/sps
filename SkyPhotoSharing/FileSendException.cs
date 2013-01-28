@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SkyPhotoSharing
 {
-    class FileSendException : ApplicationException
+    class FileSendException : FileTransactionException
     {
         public FileSendException(string file, Enlister en)
            : base(String.Format(Properties.Resources.ERROR_FILE_CANT_SEND, file, en.Name))

@@ -86,6 +86,11 @@ namespace SkyPhotoSharing
             e.Handled = true;
         }
 
+        private void OnNothingWork(object sender, RoutedEventArgs e)
+        {
+            e.Handled = true;
+        }
+
         #endregion
 
         #region 画像選択時のスクロール位置決定(シェアユーザによる選択を含む)
@@ -99,6 +104,7 @@ namespace SkyPhotoSharing
         private void OnThumbnailSelectByOtherUser(SkypePostcard card)
         {
             var p = PhotoList.GetSameItem(card.Message as SkypeMessageUniqueFile);
+            if (p == null) return;
             Thumbnails.Items.MoveCurrentTo(p);
         }
 
@@ -254,19 +260,19 @@ namespace SkyPhotoSharing
             get { return ((TextBlock)Resources["HandGrabCursor"]).Cursor; }
         }
 
-        private PhotoList PhotoList
+        private BindablePhotoList PhotoList
         {
-            get { return DataContext as PhotoList; }
+            get { return DataContext as BindablePhotoList; }
         }
 
-        private SelectableUsers SelectableUsers
+        private BindableFriens SelectableUsers
         {
-            get { return AddMemberButton.ContextMenu.DataContext as SelectableUsers; } 
+            get { return AddMemberButton.ContextMenu.DataContext as BindableFriens; } 
         }
 
-        private SharingEnlisters EnlisterList
+        private BindableEnlisters EnlisterList
         {
-            get { return ShareList.DataContext as SharingEnlisters; }
+            get { return ShareList.DataContext as BindableEnlisters; }
         }
 
         #endregion

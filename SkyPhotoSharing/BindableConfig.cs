@@ -7,17 +7,26 @@ using System.Threading.Tasks;
 
 namespace SkyPhotoSharing
 {
-    class SharingEnlisters : INotifyPropertyChanged
+    class BindableConfig : INotifyPropertyChanged
     {
-
-        public SharingEnlisters()
+        public BindableConfig()
         {
+            _attribute = Configuration.Instance;
+            PropertyChanged += (sender, e) => { };
         }
 
-        public BindingList<Enlister> List { get { return Enlisters.Instance.ConnectedList; } }
+        private Configuration _attribute;
+        public Configuration Attribute 
+        {
+            get
+            { return _attribute; }
+            set
+            {
+                _attribute = value;
+                OnPropertyChanged("Attribute");
+            }
+        }
         
-        public Enlister Owner { get {return Enlisters.Instance.Owner;} }
-
         public event PropertyChangedEventHandler PropertyChanged;
 
         protected void OnPropertyChanged(string name)
@@ -26,11 +35,6 @@ namespace SkyPhotoSharing
             {
                 PropertyChanged(this, new PropertyChangedEventArgs(name));
             }
-        }
-
-        public void Close()
-        {
-            Enlisters.Instance.Close();
-        }
+        } 
     }
 }

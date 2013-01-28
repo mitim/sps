@@ -115,6 +115,24 @@ namespace SkyPhotoSharing.Properties {
         }
         
         /// <summary>
+        ///   File transfer with {0} was already disconnected. に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string ERROR_FILE_TRANSFER_DISCONNECT {
+            get {
+                return ResourceManager.GetString("ERROR_FILE_TRANSFER_DISCONNECT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   File {1} transfer with {0} was timeout failed.  に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string ERROR_FILE_TRANSFER_TIMEOUT {
+            get {
+                return ResourceManager.GetString("ERROR_FILE_TRANSFER_TIMEOUT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Oops!!: {0} に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string MESSAGE_ERROR_OCCURRED_CAPTION {

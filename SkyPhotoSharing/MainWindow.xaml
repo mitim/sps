@@ -12,7 +12,7 @@
         Drop="OnDrop" 
         Closing="OnClosing" >
     <Window.DataContext>
-        <local:PhotoList/>
+        <local:BindablePhotoList/>
     </Window.DataContext>
     <Window.Resources>
         <ResourceDictionary>
@@ -31,7 +31,7 @@
                         </Grid.Background>
                     </Grid>
                     <Button Name="PhotoCloseButton" Width="20" Height="20" Visibility="Hidden" HorizontalAlignment="Right" VerticalAlignment="Top" ClickMode="Release" ToolTip="{Binding TIP_CLOSE_PHOTO, Source={StaticResource Resources}}"
-                            Click="OnThumbnailClose">
+                            Click="OnThumbnailClose" GotFocus="OnNothingWork">
                         <StackPanel>
                             <Image Source="{StaticResource CloseIcon}" />
                         </StackPanel>
@@ -193,7 +193,7 @@
                     <Button.ContextMenu>
                         <ContextMenu Name="SelectableUserList" ItemTemplate="{StaticResource SelectableUserMenu}" ItemContainerStyle="{StaticResource SelectableUserMenuStyle}" ItemsSource="{Binding List}" >
                             <ContextMenu.DataContext>
-                                <local:SelectableUsers />
+                                <local:BindableFriens />
                             </ContextMenu.DataContext>
                         </ContextMenu>
                     </Button.ContextMenu>
@@ -203,7 +203,7 @@
                      ItemTemplate="{StaticResource SharingEnlisterItem}"
                      ItemsSource="{Binding Path=List, Mode=OneWay}" >
                     <ListBox.DataContext>
-                        <local:SharingEnlisters />
+                        <local:BindableEnlisters />
                     </ListBox.DataContext>
                  </ListBox>
             </StackPanel>

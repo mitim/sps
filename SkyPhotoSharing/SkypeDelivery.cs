@@ -7,6 +7,7 @@ using SKYPE4COMLib;
 using System.Threading;
 using System.IO;
 using System.Collections.Concurrent;
+using System.Windows.Threading;
 
 namespace SkyPhotoSharing
 {
@@ -15,6 +16,14 @@ namespace SkyPhotoSharing
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         public enum State { INTERVAL, SENDING, RECIEVING, DISCONNECTED }
+
+        public Dictionary<State, string> StateText = new Dictionary<State, string>()
+        {
+            {State.INTERVAL, "interval"},
+            {State.SENDING, "send"},
+            {State.RECIEVING, "recieve"},
+            {State.DISCONNECTED, "disconnect"},
+        };
 
         public delegate void Event_RaiseDisconnect(Enlister enlister);
 
@@ -71,7 +80,7 @@ namespace SkyPhotoSharing
         public ConcurrentQueue<string> ReceivedPacket { get { return _receivedPacket; } }
 
         public Event_RaiseDisconnect EventRaiseDisconnect { get; set; }
-        
+
         public void PostPacket(string packet)
         {
             ReceivedPacket.Enqueue(packet);
@@ -146,7 +155,7 @@ namespace SkyPhotoSharing
             var c = SkypeCargo.Parse(j);
             log.Debug("End recieve. :" + c.FileName);
             var p = Photo.Create(c, Target);
-            PhotoList.AddFromOnline(p);
+            BindablePhotoList.AddFromOnline(p);
         }
 
         private Task<string> AsyncRecieve()
@@ -178,6 +187,7 @@ namespace SkyPhotoSharing
 
         private void RaiseDisconnect()
         {
+            if (ConnectionState == State.DISCONNECTED) return;
             WaitForInterval(State.DISCONNECTED);
             WritePacket(DISCONNECT);
         }
@@ -185,16 +195,26 @@ namespace SkyPhotoSharing
         private void WaitForInterval(State nextState)
         {
             log.Debug("Wait for interval");
-            while (ConnectionState != State.INTERVAL) Thread.Sleep(100);
+            var ch = StartTimeoutCheck();
+            while (ConnectionState != State.INTERVAL) SleepThread();
             ConnectionState = nextState;
+            StopTimeoutCheck(ch);
             log.Debug("Interval end.");
         }
 
         private string GetReply()
         {
+            var ch = StartTimeoutCheck();
             String r;
-            while (!ReceivedPacket.TryDequeue(out r)) Thread.Sleep(100);
+            while (!ReceivedPacket.TryDequeue(out r)) SleepThread();
+            StopTimeoutCheck(ch);
             return r;
+        }
+
+        private void SleepThread()
+        {
+            Thread.Sleep(100);
+            if (ConnectionState == State.DISCONNECTED) throw new TransactionDisconnectException(Target);
         }
 
         private int GetFileSize()
@@ -206,16 +226,19 @@ namespace SkyPhotoSharing
 
         private void SendAllData(string json, int length)
         {
+            var ch = StartTimeoutCheck(5);
             for (int i = 0; i < length; i += PACKET_SIZE)
             {
                 var s = (length >= i + PACKET_SIZE) ? PACKET_SIZE : length - i;
                 WritePacket(json.Substring(i, s));
                 Thread.Sleep(10);
             }
+            StopTimeoutCheck(ch);
         }
 
         private String RecieveAllData(int length)
         {
+            var ch = StartTimeoutCheck(5);
             var s = new StringBuilder(length);
             while (s.Length <= length)
             {
@@ -223,6 +246,7 @@ namespace SkyPhotoSharing
                 if (END.Equals(d)) break;
                 s.Append(d);
             }
+            StopTimeoutCheck(ch);
             return s.ToString();
         }
 
@@ -236,6 +260,26 @@ namespace SkyPhotoSharing
             ConnectionState = State.INTERVAL;
             throw ex;
         }
+
+        private DispatcherTimer StartTimeoutCheck(double minute = 1)
+        {
+            var t = new DispatcherTimer();
+            t.Interval = TimeSpan.FromMinutes(minute);
+            t.Tick += OnRaiseTimeout;
+            t.Start();
+            return t;
+        }
+
+        private void StopTimeoutCheck(DispatcherTimer timer)
+        {
+            timer.Stop();
+        }
+
+        private void OnRaiseTimeout(object sender, EventArgs e)
+        {
+            ThrowAndIntervaled( new FileTimeoutException(Target, StateText[ConnectionState]));
+        }
+
     }
 
 }
