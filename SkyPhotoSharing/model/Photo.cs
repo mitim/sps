@@ -261,8 +261,8 @@ namespace SkyPhotoSharing
             const byte MINIMUM_ALPHA = 64;
             int sh = Image.PixelHeight * 4;
             int sw = Image.PixelWidth * 4;
-            byte[] ri = new byte[16373764];
-            byte[] le = new byte[16373764];
+            byte[] ri = new byte[sh * sw];
+            byte[] le = new byte[sh * sw];
             var s = ConvertToBgra32(Image);
             s.CopyPixels(new Int32Rect(0, 0, 1, Image.PixelHeight), le, sw, 0);
             s.CopyPixels(new Int32Rect((Image.PixelWidth - 1), 0, 1, Image.PixelHeight), ri, sw, 0);

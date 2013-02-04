@@ -10,6 +10,8 @@ namespace SkyPhotoSharing
 {
     class Enlister
     {
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         public string Handle { get; protected set; }
         public string Name { get; protected set; }
         public Color Color { get; protected set; }
@@ -50,7 +52,7 @@ namespace SkyPhotoSharing
         {
             if (!IsConnecting) return;
             Delivery.PostChatMessage(string.Format(Properties.Resources.CHAT_CLOSE, Owner.Name));
-            Delivery.Disconnect();
+            Delivery.Close();
             Delivery = null;
         }
 
@@ -62,7 +64,14 @@ namespace SkyPhotoSharing
 
         public void PostPacket(string packet)
         {
-            Delivery.PostPacket(packet);
+            if (SkypeDelivery.IsCommand(packet))
+            {
+                Delivery.PostCommand(packet);
+            }
+            else
+            {
+                Delivery.PostPacket(packet);
+            }
         }
 
         public static string GetDisplayName(User skypeUser)

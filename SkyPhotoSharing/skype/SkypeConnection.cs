@@ -9,6 +9,7 @@ namespace SkyPhotoSharing
 {
 
     delegate void Event_OnRecievePostcard(SkypePostcard card);
+    delegate void Event_OnTransferExceptionOccurred(FileTransactionException ex);
 
     class SkypeConnection
     {
@@ -87,7 +88,11 @@ namespace SkyPhotoSharing
 
         public void WritePacket(string data, Enlister partner)
         {
-            log.Debug("WritePacket to user. :" + partner.Handle + " data-length:" + data.Length);
+            if (log.IsDebugEnabled)
+            {
+                log.Debug("WritePacket to user. :" + partner.Handle + " data-length:" + data.Length);
+                if (data.Length < 50) log.Debug("data:" + data);
+            }
             GetConnectingStream(partner.Handle).Write(data);
         }
 
@@ -111,6 +116,12 @@ namespace SkyPhotoSharing
             return l;
         }
 
+        public void NoticeTransferExceptionOccurred(FileTransactionException ex)
+        {
+            log.Error(ex.Message, ex);
+            EventOnTransferExceptionOccurred(ex);
+        }
+
         private Dictionary<string, Event_OnRecievePostcard> _postcardEvents = new Dictionary<string, Event_OnRecievePostcard>();
         public void SetEventOnOnRecievePostcard(string command, Event_OnRecievePostcard evnt)
         {
@@ -123,6 +134,8 @@ namespace SkyPhotoSharing
                 _postcardEvents.Add(command, evnt);
             }
         }
+
+        public Event_OnTransferExceptionOccurred EventOnTransferExceptionOccurred { set; get; }
 
         private const string UNKNOWN = "<<Unknown User>>";
         public static string GetViewableName(User user) {

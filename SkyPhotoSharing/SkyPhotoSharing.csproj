@@ -86,25 +86,29 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="FileTimeoutException.cs" />
+    <Compile Include="skype\FileTimeoutException.cs" />
     <Compile Include="CultureResources.cs" />
-    <Compile Include="FileRecieveException.cs" />
-    <Compile Include="FileSendException.cs" />
-    <Compile Include="FileTransactionException.cs" />
-    <Compile Include="ISkypePostcardMessage.cs" />
+    <Compile Include="skype\FileRecieveException.cs" />
+    <Compile Include="skype\FileSendException.cs" />
+    <Compile Include="skype\FileTransactionException.cs" />
+    <Compile Include="skype\ISkypePostcardMessage.cs" />
     <Compile Include="BindableFriens.cs" />
-    <Compile Include="Configuration.cs" />
-    <Compile Include="Enlister.cs" />
-    <Compile Include="SkypeCargo.cs" />
+    <Compile Include="model\Configuration.cs" />
+    <Compile Include="model\Enlister.cs" />
+    <Compile Include="skype\SkypeCargo.cs" />
     <Compile Include="BindableEnlisters.cs" />
-    <Compile Include="SkypeApiException.cs" />
-    <Compile Include="SkypeConnection.cs" />
-    <Compile Include="SkypeDelivery.cs" />
-    <Compile Include="Enlisters.cs" />
+    <Compile Include="skype\SkypeApiException.cs" />
+    <Compile Include="skype\SkypeConnection.cs" />
+    <Compile Include="skype\SkypeDelivery.cs" />
+    <Compile Include="model\Enlisters.cs" />
     <Compile Include="BindableConfig.cs" />
-    <Compile Include="SkypeMessageUniqueFile.cs" />
-    <Compile Include="SkypePostcard.cs" />
-    <Compile Include="TransactionDisconnectException.cs" />
+    <Compile Include="skype\SkypeMessageUniqueFile.cs" />
+    <Compile Include="skype\SkypePostcard.cs" />
+    <Compile Include="skype\TransactionDisconnectException.cs" />
+    <Page Include="GlassListBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -119,7 +123,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Photo.cs" />
+    <Compile Include="model\Photo.cs" />
     <Compile Include="BindablePhotoList.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
@@ -192,6 +196,11 @@
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Graphics\ScrollLeft.png" />
+    <Resource Include="Graphics\ScrollRight.png" />
+    <Resource Include="Graphics\ScrollThumb.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

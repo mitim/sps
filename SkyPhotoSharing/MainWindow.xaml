@@ -16,102 +16,113 @@
     </Window.DataContext>
     <Window.Resources>
         <ResourceDictionary>
-            <TextBlock x:Key="HandGrabCursor" Cursor="Graphics/HandGrab.cur"/>
-            <TextBlock x:Key="HandOpenCursor" Cursor="Graphics/HandOpen.cur"/>
-            <!-- サムネイル用ListBoxItemのテンプレート -->
-            <DataTemplate  x:Key="ThumbnailItem">
-                <Grid Width="70" Height="70">
-                    <Grid Name="ThumbnailGrid"  Width="70" Height="70">
-                        <Image Name="Thumbnail" Margin="10,20,10,0" Width="40" Height="40"  Source="{Binding Image}" Stretch="UniformToFill" GotFocus="OnThumbnailClick" />
-                        <Grid.Background>
-                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                <GradientStop Color="Black" Offset="0.0"/>
-                                <GradientStop Color="{Binding Path=Color, Mode=OneWay, FallbackValue={StaticResource Black}}" Offset="0.9"/>
-                            </LinearGradientBrush>
-                        </Grid.Background>
-                    </Grid>
-                    <Button Name="PhotoCloseButton" Width="20" Height="20" Visibility="Hidden" HorizontalAlignment="Right" VerticalAlignment="Top" ClickMode="Release" ToolTip="{Binding TIP_CLOSE_PHOTO, Source={StaticResource Resources}}"
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="GlassListBox.xaml"/>
+                <ResourceDictionary>
+                    <TextBlock x:Key="HandGrabCursor" Cursor="Graphics/HandGrab.cur"/>
+                    <TextBlock x:Key="HandOpenCursor" Cursor="Graphics/HandOpen.cur"/>
+                    <!-- サムネイル用ListBoxItemのテンプレート -->
+                    <DataTemplate  x:Key="ThumbnailItem">
+                        <Grid Width="70" Height="70">
+                            <Grid Name="ThumbnailGrid"  Width="70" Height="70">
+                                <Image Name="Thumbnail" Margin="10,20,10,0" Width="40" Height="40"  Source="{Binding Image}" Stretch="UniformToFill" GotFocus="OnThumbnailClick" />
+                                <Grid.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                        <GradientStop Color="Black" Offset="0.0"/>
+                                        <GradientStop Color="{Binding Path=Color, Mode=OneWay, FallbackValue={StaticResource Black}}" Offset="0.9"/>
+                                    </LinearGradientBrush>
+                                </Grid.Background>
+                            </Grid>
+                            <Button Name="PhotoCloseButton" Width="20" Height="20" Visibility="Hidden" HorizontalAlignment="Right" VerticalAlignment="Top" ClickMode="Release" ToolTip="{Binding TIP_CLOSE_PHOTO, Source={StaticResource Resources}}"
                             Click="OnThumbnailClose" GotFocus="OnNothingWork">
-                        <StackPanel>
-                            <Image Source="{StaticResource CloseIcon}" />
-                        </StackPanel>
-                    </Button>
-                </Grid>
-                <DataTemplate.Triggers>
-                    <DataTrigger Binding="{Binding IsSelected}" Value="true">
-                        <Setter TargetName="PhotoCloseButton" Property="Visibility" Value="Visible" />
-                        <Setter TargetName="ThumbnailGrid" Property="Background">
+                                <StackPanel>
+                                    <Image Source="{StaticResource CloseIcon}" />
+                                </StackPanel>
+                            </Button>
+                        </Grid>
+                        <DataTemplate.Triggers>
+                            <DataTrigger Binding="{Binding IsSelected}" Value="true">
+                                <Setter TargetName="PhotoCloseButton" Property="Visibility" Value="Visible" />
+                                <Setter TargetName="ThumbnailGrid" Property="Background">
+                                    <Setter.Value>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                            <GradientStop Color="White" Offset="0.0"/>
+                                            <GradientStop Color="{Binding Path=Color, Mode=OneWay, FallbackValue={StaticResource Black}}" Offset="0.9"/>
+                                        </LinearGradientBrush>
+                                    </Setter.Value>
+                                </Setter>
+                                <Setter TargetName="Thumbnail" Property="Margin" Value="0" />
+                                <Setter TargetName="Thumbnail" Property="Width" Value="60" />
+                                <Setter TargetName="Thumbnail" Property="Height" Value="60" />
+                            </DataTrigger>
+                        </DataTemplate.Triggers>
+                    </DataTemplate>
+                    <!-- サムネイルListBoxのスタイル -->
+                    <Style x:Key="ThumbnailBox" TargetType="{x:Type ListBox}">
+                        <Setter Property="Padding" Value="5,2,2,5" />
+                        <Setter Property="Margin" Value="0" />
+                        <Setter Property="MinHeight" Value="70" />
+                        <Setter Property="Background" Value="Black" />
+                        <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Disabled" />
+                        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Hidden" />
+                        <Setter Property="ItemsPanel">
                             <Setter.Value>
-                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                    <GradientStop Color="White" Offset="0.0"/>
-                                    <GradientStop Color="{Binding Path=Color, Mode=OneWay, FallbackValue={StaticResource Black}}" Offset="0.9"/>
-                                </LinearGradientBrush>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
                             </Setter.Value>
                         </Setter>
-                        <Setter TargetName="Thumbnail" Property="Margin" Value="0" />
-                        <Setter TargetName="Thumbnail" Property="Width" Value="60" />
-                        <Setter TargetName="Thumbnail" Property="Height" Value="60" />
-                    </DataTrigger>
-                </DataTemplate.Triggers>
-            </DataTemplate>
-            <!-- サムネイルListBoxのスタイル -->
-            <Style x:Key="ThumbnailBox" TargetType="{x:Type ListBox}">
-                <Setter Property="Padding" Value="5,2,2,5" />
-                <Setter Property="Margin" Value="0" />
-                <Setter Property="MinHeight" Value="70" />
-                <Setter Property="Background" Value="Black" />
-                <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Disabled" />
-                <Setter Property="ItemsPanel">
-                    <Setter.Value>
-                        <ItemsPanelTemplate>
-                            <StackPanel Orientation="Horizontal" />
-                        </ItemsPanelTemplate>
-                    </Setter.Value>
-                </Setter>
-            </Style>
-            <!-- オンラインユーザー表示用MenuItemのテンプレート -->
-            <Style x:Key="SelectableUserMenuStyle" TargetType="MenuItem">
-                <EventSetter Event="Click"   Handler="OnAddUser" />  
-            </Style>
-            <DataTemplate x:Key="SelectableUserMenu" >
-                <Grid Background="AntiqueWhite">
-                    <TextBlock Name="UserName" Text="{Binding FullName}" />
-                </Grid>
-                <DataTemplate.Triggers>
-                    <DataTrigger Binding="{Binding FullName}" Value="" >
-                        <Setter TargetName="UserName" Property="Text" Value="{Binding DisplayName}" />
-                    </DataTrigger>
-                    <MultiDataTrigger>
-                        <MultiDataTrigger.Conditions>
-                            <Condition Binding="{Binding FullName}" Value="" />
-                            <Condition Binding="{Binding DisplayName}" Value="" />
-                        </MultiDataTrigger.Conditions>
-                        <Setter TargetName="UserName" Property="Text" Value="{Binding Handle}" />
-                    </MultiDataTrigger>
-                </DataTemplate.Triggers>
-            </DataTemplate>
-            <!-- 参加ユーザー表示用ListBoxItemのテンプレート -->
-            <DataTemplate x:Key="SharingEnlisterItem">
-                <TextBlock Text="{Binding Name}" Foreground="{Binding Brush}" HorizontalAlignment="Left" Margin="1,0,0,1" Background="DarkBlue" />
-            </DataTemplate>
-            <!-- 参加ユーザー表示用ListBoxのスタイル -->
-            <Style x:Key="EnlisterBox" TargetType="{x:Type ListBox}">
-                <Setter Property="IsEnabled" Value="True" />
-                <Setter Property="Padding" Value="0" />
-                <Setter Property="Margin" Value="0" />
-                <Setter Property="BorderThickness" Value="0" />
-                <Setter Property="MinHeight" Value="20" />
-                <Setter Property="Background" Value="DarkBlue" />
-                <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Disabled" />
-                <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
-                <Setter Property="ItemsPanel">
-                    <Setter.Value>
-                        <ItemsPanelTemplate>
-                            <StackPanel Orientation="Horizontal" />
-                        </ItemsPanelTemplate>
-                    </Setter.Value>
-                </Setter>
-            </Style>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                    <!-- オンラインユーザー表示用MenuItemのテンプレート -->
+                    <Style x:Key="SelectableUserMenuStyle" TargetType="MenuItem">
+                        <EventSetter Event="Click"   Handler="OnAddUser" />
+                    </Style>
+                    <DataTemplate x:Key="SelectableUserMenu" >
+                        <Grid Background="AntiqueWhite">
+                            <TextBlock Name="UserName" Text="{Binding FullName}" />
+                        </Grid>
+                        <DataTemplate.Triggers>
+                            <DataTrigger Binding="{Binding FullName}" Value="" >
+                                <Setter TargetName="UserName" Property="Text" Value="{Binding DisplayName}" />
+                            </DataTrigger>
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding FullName}" Value="" />
+                                    <Condition Binding="{Binding DisplayName}" Value="" />
+                                </MultiDataTrigger.Conditions>
+                                <Setter TargetName="UserName" Property="Text" Value="{Binding Handle}" />
+                            </MultiDataTrigger>
+                        </DataTemplate.Triggers>
+                    </DataTemplate>
+                    <!-- 参加ユーザー表示用ListBoxItemのテンプレート -->
+                    <DataTemplate x:Key="SharingEnlisterItem">
+                        <TextBlock Text="{Binding Name}" Foreground="{Binding Brush}" HorizontalAlignment="Left" Margin="1,0,0,1" Background="DarkBlue" />
+                    </DataTemplate>
+                    <!-- 参加ユーザー表示用ListBoxのスタイル -->
+                    <Style x:Key="EnlisterBox" TargetType="{x:Type ListBox}">
+                        <Setter Property="IsEnabled" Value="True" />
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="Margin" Value="0" />
+                        <Setter Property="BorderThickness" Value="0" />
+                        <Setter Property="MinHeight" Value="20" />
+                        <Setter Property="Background" Value="DarkBlue" />
+                        <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Disabled" />
+                        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+                        <Setter Property="ItemsPanel">
+                            <Setter.Value>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </ResourceDictionary>
+            </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Window.Resources>
     

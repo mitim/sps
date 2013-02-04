@@ -74,9 +74,9 @@ namespace SkyPhotoSharing
 
         public void Close()
         {
-            foreach (var e in ConnectedList)
+            for (var i = ConnectedList.Count-1; 0 <= i; i--)
             {
-                e.Close();
+                ConnectedList[i].Close();
             }
         }
 
@@ -96,7 +96,7 @@ namespace SkyPhotoSharing
         {
             if (_enlisters.Count <= 0) return;
             var ex = SkypeConnection.Instance.GetConnectingUserhandles();
-            for (var i = _enlisters.Count-1; -1 < i; i--)
+            for (var i = _enlisters.Count-1; 0 <= i; i--)
             {
                 var en = _enlisters[i];
                 if (ex.Contains(en.Handle)) continue;

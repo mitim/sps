@@ -7,6 +7,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Controls.Primitives;
 using SKYPE4COMLib;
+using System.Threading;
 
 namespace SkyPhotoSharing
 {
@@ -29,6 +30,7 @@ namespace SkyPhotoSharing
             ViewWindow.Cursor = HandOpenCursor;
             Thumbnails.ItemContainerGenerator.ItemsChanged += OnThumbnailsUpdated;
             SkypeConnection.Instance.SetEventOnOnRecievePostcard(SkypePostcard.RAISE_SELECT_FILE, OnThumbnailSelectByOtherUser);
+            SkypeConnection.Instance.EventOnTransferExceptionOccurred += OnTransferExceptionOccurred;
         }
 
         private void OnClosing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -53,8 +55,11 @@ namespace SkyPhotoSharing
 
         private void OnDrop(object sender, DragEventArgs e)
         {
+            Activate();
             try
             {
+                ForceCursor = true;
+                Cursor = Cursors.Wait;
                 string[] files = e.Data.GetData(DataFormats.FileDrop) as string[];
                 foreach (string p in files)
                 {
@@ -62,11 +67,17 @@ namespace SkyPhotoSharing
                     if (Photo.IsCoinsidable(p))
                     {
                         PhotoList.AddNewLocal(p);
+                        Thread.Sleep(100);
                     }
                 }
+                Thumbnails.Items.MoveCurrentToLast();
+                Thumbnails.ScrollIntoView(Thumbnails.Items.CurrentItem);
+                ForceCursor = false;
+                Cursor = null;
             }
             catch (ApplicationException ex)
             {
+                Cursor = Cursors.Arrow;
                 MessageBox.Show(this, ex.Message, string.Format(Properties.Resources.MESSAGE_ERROR_OCCURRED_CAPTION, ex.GetType().ToString()));
             }
 
@@ -243,6 +254,15 @@ namespace SkyPhotoSharing
         }
 
         #endregion
+
+        #endregion
+        
+        #region メッセージボックス表示
+        
+        private void OnTransferExceptionOccurred(FileTransactionException ex)
+        {
+            MessageBox.Show(this, ex.Message, string.Format(Properties.Resources.MESSAGE_ERROR_OCCURRED_CAPTION, ex.GetType().ToString()));
+        }
 
         #endregion
 

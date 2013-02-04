@@ -33,17 +33,19 @@ namespace SkyPhotoSharing
             e.Handled = true;
             Exception ex = e.Exception as Exception;
             log.Error(ex.Message, ex);
+            ShowToUserMessage(ex);
         }
 
         private void HandleUnhandledThreadException(object sende, UnhandledExceptionEventArgs e)
         {
             Exception ex = e.ExceptionObject as Exception;
             log.Error(ex.Message, ex);
+            ShowToUserMessage(ex);
         }
 
         private void ShowToUserMessage(Exception e)
         {
-            if ((e is FileRecieveException) || (e is FileSendException))
+            if (e is FileTransactionException)
             {
                 var b = MessageBox.Show(e.Message,  e.GetType().ToString());
             }
