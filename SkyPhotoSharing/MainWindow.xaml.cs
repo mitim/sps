@@ -8,6 +8,7 @@ using System.Windows.Media;
 using System.Windows.Controls.Primitives;
 using SKYPE4COMLib;
 using System.Threading;
+using System.IO;
 
 namespace SkyPhotoSharing
 {
@@ -21,6 +22,7 @@ namespace SkyPhotoSharing
         public MainWindow()
         {
             InitializeComponent();
+            Effector = new ImageEffector();
         }
 
         #region イベント
@@ -64,10 +66,19 @@ namespace SkyPhotoSharing
                 foreach (string p in files)
                 {
                     log.Debug(p);
-                    if (Photo.IsCoinsidable(p))
+                    try 
                     {
-                        PhotoList.AddNewLocal(p);
-                        Thread.Sleep(100);
+                        if (Photo.IsCoinsidable(p))
+                        {
+                            PhotoList.AddNewLocal(p);
+                            Thread.Sleep(100);
+                        }
+                    }
+                    catch(NotSupportedException ex)
+                    {
+                        log.Error(ex.Message, ex);
+                        MessageBox.Show(this, string.Format(Properties.Resources.ERROR_FILE_NOT_PHOTO, Path.GetFileName(p)), string.Format(Properties.Resources.MESSAGE_ERROR_OCCURRED_CAPTION, ex.GetType().ToString()));
+                        continue;
                     }
                 }
                 Thumbnails.Items.MoveCurrentToLast();
@@ -77,8 +88,11 @@ namespace SkyPhotoSharing
             }
             catch (ApplicationException ex)
             {
-                Cursor = Cursors.Arrow;
                 MessageBox.Show(this, ex.Message, string.Format(Properties.Resources.MESSAGE_ERROR_OCCURRED_CAPTION, ex.GetType().ToString()));
+            }
+            finally
+            {
+                Cursor = null;
             }
 
         }
@@ -197,27 +211,46 @@ namespace SkyPhotoSharing
 
         #region  Viewのマウスホイールでの拡大/縮小
 
-        private void View_OnMouseWheel(object sender, MouseWheelEventArgs e)
+        private void View_OnScaleChange(object sender, MouseWheelEventArgs e)
         {
             ScaleTransform sc = ((TransformGroup)ViewMap.LayoutTransform).Children.ElementAt(0) as ScaleTransform;
-            Point omp = e.GetPosition(ViewMap); 
-            ScaleChangeByWheel(sc, e.Delta); 
+            Point omp = e.GetPosition(ViewMap);
+            ScaleChangeByWheel(sc, e.Delta);
             CorrectScrollAtMouse(e.GetPosition(ViewWindow), omp, sc.ScaleX);
         }
 
         #endregion
-        
+
+        private void View_OnMouseOver(object sender, MouseEventArgs e)
+        {
+            switch (Effector.Mode)
+            {
+                case ImageEffector.EffectMode.SCROLL:
+                    if (e.LeftButton != MouseButtonState.Pressed) return;
+                    View_OnScrollOver(sender, e);
+                    break;
+                case ImageEffector.EffectMode.ROTATE:
+                    if (e.MiddleButton != MouseButtonState.Pressed) return;
+                    View_OnRotateOver(sender, e);
+                    break;
+            }
+        }
+
         #region Viewのマウスドラッグでのスクロール
- 
+
         private void View_OnScrollEnter(object sender, MouseButtonEventArgs e)
         {
-            ScrollStartPoint = e.GetPosition(ViewWindow);
+            Effector.PrevScroll(e.GetPosition(ViewWindow));
             ViewWindow.Cursor = HandGrabCursor;
         }
 
+
+
         private void View_OnScrollOver(object sender, MouseEventArgs e)
         {
-            if (e.LeftButton == MouseButtonState.Pressed) ScrollToPointedPosition(e.GetPosition(ViewWindow));
+            var np = Effector.ScrollTo(ViewWindowOffset, e.GetPosition(ViewWindow));
+            ViewWindow.ScrollToHorizontalOffset(np.X);
+            ViewWindow.ScrollToVerticalOffset(np.Y);
         }
 
         private void View_OnScrollLeave(object sender, MouseButtonEventArgs e)
@@ -227,8 +260,34 @@ namespace SkyPhotoSharing
 
         private void View_OnScrolled(object sender, ScrollChangedEventArgs e)
         {
-            UpdatePhotoViewPosition(Thumbnails.SelectedItem as Photo);
+            var p = Thumbnails.SelectedItem as Photo;
+            if (p == null) return;
+            p.ViewPosition = ViewWindowOffset;
         }
+
+        #endregion
+
+        #region Viewの中ボタンによる回転
+
+        private void View_OnRotateEnter(object sender, MouseEventArgs e)
+        {
+            if (e.MiddleButton != MouseButtonState.Pressed) return;
+            Effector.PrevRotate(e.GetPosition(ViewMap));
+            ViewWindow.Cursor = HandGrabCursor;
+        }
+
+        private void View_OnRotateOver(object sender, MouseEventArgs e)
+        {
+            var p = Thumbnails.SelectedItem as Photo;
+            if (p == null) return;
+            p.Rotate = Effector.RotateTo(p.Rotate, ViewMapSize, e.GetPosition(ViewMap));
+        }
+
+        private void View_OnRotateLeave(object sender, MouseButtonEventArgs e)
+        {
+            ViewWindow.Cursor = HandOpenCursor;
+        }
+
 
         #endregion
 
@@ -256,9 +315,9 @@ namespace SkyPhotoSharing
         #endregion
 
         #endregion
-        
+
         #region メッセージボックス表示
-        
+
         private void OnTransferExceptionOccurred(FileTransactionException ex)
         {
             MessageBox.Show(this, ex.Message, string.Format(Properties.Resources.MESSAGE_ERROR_OCCURRED_CAPTION, ex.GetType().ToString()));
@@ -287,7 +346,7 @@ namespace SkyPhotoSharing
 
         private BindableFriens SelectableUsers
         {
-            get { return AddMemberButton.ContextMenu.DataContext as BindableFriens; } 
+            get { return AddMemberButton.ContextMenu.DataContext as BindableFriens; }
         }
 
         private BindableEnlisters EnlisterList
@@ -295,7 +354,25 @@ namespace SkyPhotoSharing
             get { return ShareList.DataContext as BindableEnlisters; }
         }
 
+        private Point ViewWindowOffset
+        {
+            get
+            {
+                return new Point(ViewWindow.HorizontalOffset, ViewWindow.VerticalOffset);
+            }
+        }
+
+        private Point ViewMapSize
+        {
+            get
+            {
+                return new Point(ViewMap.Width, ViewMap.Height);
+            }
+        }
+
         #endregion
+
+        private ImageEffector Effector { get; set; }
 
         private const double ZOOM_DELTA = 0.05;
 
@@ -303,15 +380,18 @@ namespace SkyPhotoSharing
         {
             double v = ZoomDelta(delta);
             double ns = scale.ScaleX + v;
-            if (ns > ZOOM_DELTA) {
+            if (ns > ZOOM_DELTA)
+            {
                 scale.ScaleX = ns;
                 scale.ScaleY = ns;
-            } else {
+            }
+            else
+            {
                 scale.ScaleX = ZOOM_DELTA;
                 scale.ScaleY = ZOOM_DELTA;
             }
         }
-        
+
         private void CorrectScrollAtMouse(Point viewPos, Point mapPos, double mapScale)
         {
             double x = mapPos.X * mapScale - viewPos.X;
@@ -325,28 +405,11 @@ namespace SkyPhotoSharing
             return delta > 0 ? ZOOM_DELTA : -ZOOM_DELTA;
         }
 
-        private Point ScrollStartPoint { set; get; }
-
-        private void ScrollToPointedPosition(Point delta)
-        {
-            double x = ViewWindow.HorizontalOffset + (ScrollStartPoint.X - delta.X);
-            double y = ViewWindow.VerticalOffset + (ScrollStartPoint.Y - delta.Y);
-            ViewWindow.ScrollToHorizontalOffset(x);
-            ViewWindow.ScrollToVerticalOffset(y);
-            ScrollStartPoint = delta;
-        }
-
-        private void ResetViewTransforms(Photo p) 
+        private void ResetViewTransforms(Photo p)
         {
             if (p == null) return;
             ViewWindow.ScrollToHorizontalOffset(p.ViewPosition.X);
             ViewWindow.ScrollToVerticalOffset(p.ViewPosition.Y);
-        }
- 
-        private void UpdatePhotoViewPosition(Photo p)
-        {
-            if (p == null) return;
-            p.ViewPosition = new Point(ViewWindow.HorizontalOffset, ViewWindow.VerticalOffset);
         }
 
         private void RemovePhoto()
@@ -366,6 +429,5 @@ namespace SkyPhotoSharing
             }
             return ns;
         }
-
     }
 }

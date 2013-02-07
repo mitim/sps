@@ -135,11 +135,17 @@
   <data name="ERROR_FILE_CANT_SEND" xml:space="preserve">
     <value>The file '{0}' can't send to user'{1}'.</value>
   </data>
+  <data name="ERROR_FILE_NOT_PHOTO" xml:space="preserve">
+    <value>Can never recognize the file '{0}' as photo. It's broken or not a photo data.</value>
+  </data>
   <data name="ERROR_FILE_TRANSFER_DISCONNECT" xml:space="preserve">
     <value>File transfer with {0} was already disconnected.</value>
   </data>
   <data name="ERROR_FILE_TRANSFER_TIMEOUT" xml:space="preserve">
     <value>File {1} transfer with {0} was timeout failed. </value>
+  </data>
+  <data name="ERROR_SKYPE_DISABLE" xml:space="preserve">
+    <value>Can't connect to Skype. What's up?</value>
   </data>
   <data name="MESSAGE_ERROR_OCCURRED_CAPTION" xml:space="preserve">
     <value>Oops!!: {0}</value>

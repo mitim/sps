@@ -86,6 +86,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="model\ImageEffector.cs" />
     <Compile Include="skype\FileTimeoutException.cs" />
     <Compile Include="CultureResources.cs" />
     <Compile Include="skype\FileRecieveException.cs" />
@@ -151,7 +152,9 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
@@ -192,15 +195,7 @@
     <Resource Include="Graphics\ResizeFit.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Graphics\separator.png" />
-  </ItemGroup>
-  <ItemGroup>
     <WCFMetadata Include="Service References\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Graphics\ScrollLeft.png" />
-    <Resource Include="Graphics\ScrollRight.png" />
-    <Resource Include="Graphics\ScrollThumb.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

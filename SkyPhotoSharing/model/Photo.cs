@@ -32,6 +32,8 @@ namespace SkyPhotoSharing
             BlendBackgroundColor();
             _viewPosition = new Point(Image.Width / 2, 0);
             _scale = DEFAULT_SCALE;
+            CenterX = Image.PixelWidth / 2;
+            CenterY = Image.PixelHeight / 2;
             _rotate = DEFAULT_ROTATE;
             _isSelected = false;
             log.Debug("Create new photo. File:" + FileName + " Size:" + Image.StreamSource.Length);
@@ -55,6 +57,8 @@ namespace SkyPhotoSharing
         public Color BackGroundTop { get; protected set; }
         public Color BackGroundCenter { get; protected set; }
         public Color BackGroundBottom { get; protected set; }
+        public double CenterX { get; protected set; }
+        public double CenterY { get; protected set; }
         private Point _viewPosition;
         public Point ViewPosition 
         {

@@ -49,7 +49,7 @@ namespace SkyPhotoSharing
 
         #endregion
 
-        // ENDだけは終了マークなので通常パケットとして処理させる。
+        // 注)ENDだけは終了マークなので通常パケットとして処理させる。
         private static readonly HashSet<string> COMMANDS = new HashSet<string>(new []{ 
             SEND, DISCONNECT, ALIVE, OK, NG
         }) ;
@@ -187,6 +187,7 @@ namespace SkyPhotoSharing
             try
             {
                 await AsyncSend(photo);
+                log.Debug("End send.");
             }
             catch (FileTransactionException ex)
             {
@@ -235,7 +236,6 @@ namespace SkyPhotoSharing
                 SendAllData(j, len);
                 WritePacket(END);
                 ConnectionState = State.INTERVAL;
-                log.Debug("End send.");
             });
         }
 

@@ -61,14 +61,17 @@ namespace SkyPhotoSharing
             Skype.Client.Start();
         }
 
-        public void WaitSkypeRunning()
+        public bool WaitSkypeRunning()
         {
             log.Debug("Wait for Skype.");
+            DateTime n = DateTime.Now;
             while (!Skype.Client.IsRunning)
             {
                 Thread.Sleep(100);
+                if (n.AddMinutes(3) < DateTime.Now) return false;
             }
             log.Debug("Skype startup.");
+            return true;
         }
 
         public void ConnectTo(User usr)
@@ -193,6 +196,7 @@ namespace SkyPhotoSharing
             if (log.IsDebugEnabled)
             {
                 String v = "";
+                
                 foreach (ApplicationStream s in streams)
                 {
                     v += " [stream :" + s.ApplicationName + " " + s.DataLength + "bytes handle:" + s.Handle + " Partner:" + s.PartnerHandle + "]";

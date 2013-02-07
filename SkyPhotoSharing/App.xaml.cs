@@ -15,17 +15,28 @@ namespace SkyPhotoSharing
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-        public const string APPNAME = "Sky_Photo_Sharing";
+        public const string APPNAME = "SkyPhotoSharing";
+
+        private System.Threading.Mutex mutex
+            = new System.Threading.Mutex(false, APPNAME);
+
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {
-            SkypeConnection.Instance.WaitSkypeRunning();
+            AvoidMultiActivate();
+            WaitSkype();
             System.Windows.Forms.Application.EnableVisualStyles();
             this.DispatcherUnhandledException +=
                 new DispatcherUnhandledExceptionEventHandler(HandleUnhandledUIException);
-
             AppDomain.CurrentDomain.UnhandledException +=
-               new UnhandledExceptionEventHandler(HandleUnhandledThreadException);
+                new UnhandledExceptionEventHandler(HandleUnhandledThreadException);
+        }
+
+        private void Application_Exit(object sender, ExitEventArgs e)
+        {
+            if (mutex == null) return;
+            mutex.ReleaseMutex();
+            mutex.Close();
         }
 
         private void HandleUnhandledUIException(object sender,DispatcherUnhandledExceptionEventArgs e)
@@ -49,6 +60,24 @@ namespace SkyPhotoSharing
             {
                 var b = MessageBox.Show(e.Message,  e.GetType().ToString());
             }
+        }
+
+        private void AvoidMultiActivate()
+        {
+            if (mutex.WaitOne(0, false) == true) return;
+            log.Debug("Multiple boot detected.");
+            mutex.Close();
+            mutex = null;
+            Shutdown();
+        }
+
+        private void WaitSkype()
+        {
+            var r = SkypeConnection.Instance.WaitSkypeRunning();
+            if (r == true) return; 
+            log.Error("Can't connect to Skype.");
+            MessageBox.Show(SkyPhotoSharing.Properties.Resources.ERROR_SKYPE_DISABLE);
+            Shutdown();
         }
     }
 }

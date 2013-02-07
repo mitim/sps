@@ -17,14 +17,41 @@
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
+                <!-- (結局ガラス様にはならなかった) シンプルで細い サムネイル用のスクロールバー -->
                 <ResourceDictionary Source="GlassListBox.xaml"/>
                 <ResourceDictionary>
+                    <!-- 独自マウスカーソルのリソース登録(TextBlockはダミー) -->
                     <TextBlock x:Key="HandGrabCursor" Cursor="Graphics/HandGrab.cur"/>
                     <TextBlock x:Key="HandOpenCursor" Cursor="Graphics/HandOpen.cur"/>
+                    <!-- 区切り線ブロック -->
+                    <Style x:Key="SeparatorStyle" TargetType="Border">
+                        <Setter Property="Margin" Value="5,0,0,5"/>
+                        <Setter Property="Width" Value="4"/>
+                        <Setter Property="Height" Value="Auto"/>
+                        <Setter Property="BorderThickness" Value="1" />
+                        <Setter Property="Opacity" Value="0.8" />
+                        <Setter Property="Background">
+                            <Setter.Value>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                    <GradientStop Color="PowderBlue" Offset="0.0" />
+                                    <GradientStop Color="#00000000" Offset="1.0" />
+                                </LinearGradientBrush>
+                            </Setter.Value>
+                        </Setter>
+                        <Setter Property="BorderBrush">
+                            <Setter.Value>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                    <GradientStop Color="PowderBlue" Offset="0.0" />
+                                    <GradientStop Color="PowderBlue" Offset="0.5" />
+                                    <GradientStop Color="#00000000" Offset="1.0" />
+                                </LinearGradientBrush>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
                     <!-- サムネイル用ListBoxItemのテンプレート -->
                     <DataTemplate  x:Key="ThumbnailItem">
                         <Grid Width="70" Height="70">
-                            <Grid Name="ThumbnailGrid"  Width="70" Height="70">
+                            <Grid Name="ThumbnailGrid"  Width="70" Height="70" ToolTip="{Binding FileName}">
                                 <Image Name="Thumbnail" Margin="10,20,10,0" Width="40" Height="40"  Source="{Binding Image}" Stretch="UniformToFill" GotFocus="OnThumbnailClick" />
                                 <Grid.Background>
                                     <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
@@ -34,7 +61,7 @@
                                 </Grid.Background>
                             </Grid>
                             <Button Name="PhotoCloseButton" Width="20" Height="20" Visibility="Hidden" HorizontalAlignment="Right" VerticalAlignment="Top" ClickMode="Release" ToolTip="{Binding TIP_CLOSE_PHOTO, Source={StaticResource Resources}}"
-                            Click="OnThumbnailClose" GotFocus="OnNothingWork">
+                                    Click="OnThumbnailClose" GotFocus="OnNothingWork">
                                 <StackPanel>
                                     <Image Source="{StaticResource CloseIcon}" />
                                 </StackPanel>
@@ -125,7 +152,7 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Window.Resources>
-    
+    <!-- ##### ここから画面 ##### -->
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="80" />
@@ -156,13 +183,15 @@
         </Grid>
         <!-- 画像表示部 -->
         <Grid Grid.Column="0" Grid.Row="1">
-            <ScrollViewer Name="ViewWindow" VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Hidden"
+            <ScrollViewer Name="ViewWindow" VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Hidden" CanContentScroll="True"
                           Initialized="ViewWindow_OnInitialized" 
-                          PreviewMouseWheel="View_OnMouseWheel" 
+                          PreviewMouseWheel="View_OnScaleChange" 
+                          MouseMove="View_OnMouseOver" 
                           PreviewMouseLeftButtonDown="View_OnScrollEnter" 
-                          MouseMove="View_OnScrollOver" 
                           PreviewMouseLeftButtonUp="View_OnScrollLeave" 
-                          ScrollChanged="View_OnScrolled" >
+                          ScrollChanged="View_OnScrolled"
+                          PreviewMouseDown="View_OnRotateEnter" 
+                          PreviewMouseUp="View_OnRotateLeave">
                 <ScrollViewer.Background>
                     <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
                         <GradientStop Offset="0.0" Color="{Binding Photos/BackGroundTop, FallbackValue={StaticResource Silver}}" />
@@ -170,19 +199,19 @@
                         <GradientStop Offset="1.0" Color="{Binding Photos/BackGroundBottom, FallbackValue={StaticResource Silver}}" />
                     </LinearGradientBrush>
                 </ScrollViewer.Background>
-                <Image Name="ViewMap"  Source="{Binding Photos/Image, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True}" Stretch="UniformToFill" 
-                       Width="{Binding RelativeSource={RelativeSource Self}, Path=Source.PixelWidth}" 
-                       Height="{Binding RelativeSource={RelativeSource Self}, Path=Source.PixelHeight}" 
-                       MouseWheel="View_OnMouseWheel" TargetUpdated="View_SourceChanged" >
+                <Image Name="ViewMap" Source="{Binding Photos/Image, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True}" Stretch="UniformToFill" 
+                           Width="{Binding RelativeSource={RelativeSource Self}, Path=Source.PixelWidth}" 
+                           Height="{Binding RelativeSource={RelativeSource Self}, Path=Source.PixelHeight}" 
+                           TargetUpdated="View_SourceChanged">
                     <Image.LayoutTransform>
-                        <TransformGroup>
-                            <!-- 拡大縮小 -->
-                            <ScaleTransform ScaleX="{Binding Photos/Scale, Mode=TwoWay}"  ScaleY="{Binding Photos/Scale, Mode=TwoWay}"/>
-                            <!-- 回転 -->
-                            <RotateTransform />
-                        </TransformGroup>
-                    </Image.LayoutTransform>
-                </Image>
+                            <TransformGroup>
+                                <!-- 拡大縮小 -->
+                                <ScaleTransform ScaleX="{Binding Photos/Scale, Mode=TwoWay}"  ScaleY="{Binding Photos/Scale, Mode=TwoWay}"/>
+                                <!-- 回転 -->
+                                <RotateTransform CenterX="{Binding Photos/CenterX}" CenterY="{Binding Photos/CenterY}" Angle="{Binding Photos/Rotate, Mode=TwoWay}"/>
+                            </TransformGroup>
+                        </Image.LayoutTransform>
+                    </Image>
             </ScrollViewer>
         </Grid>
         <!-- 操作部 -->
@@ -231,7 +260,7 @@
                         IsEnabled="{Binding IsControlEnable, Mode=OneWay}"
                         ToolTip="{Binding TIP_SCALE_FIT, Source={StaticResource Resources}}"
                         Click="OnScaleToFit"/>
-                <Image Source="{StaticResource Separator}" Opacity="0.5" />
+                <Border Style="{StaticResource SeparatorStyle}" />
                 <Button Name="SaveImageButton" 
                         Style="{StaticResource FlatButton}" 
                         Content="{StaticResource SaveIcon}"  

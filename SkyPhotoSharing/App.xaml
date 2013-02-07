@@ -3,9 +3,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:SkyPhotoSharing"
              xmlns:properties="clr-namespace:SkyPhotoSharing.Properties"
-             Startup="Application_Startup"
              StartupUri="MainWindow.xaml"
-             ShutdownMode="OnMainWindowClose" >
+             ShutdownMode="OnMainWindowClose" 
+             Startup="Application_Startup"
+             Exit="Application_Exit" >
     <Application.Resources>
         <properties:Resources x:Key="Resources" />
         <BitmapImage x:Key="CloseIcon" UriSource="Graphics\PhotoClose.png" />
@@ -13,7 +14,6 @@
         <BitmapImage x:Key="SaveIcon" UriSource="Graphics\SavePicture.png" />
         <BitmapImage x:Key="ResizeOriginalIcon" UriSource="Graphics\ResizeOriginal.png" />
         <BitmapImage x:Key="ResizeToFitIcon" UriSource="Graphics\ResizeFit.png" />
-        <BitmapImage x:Key="Separator" UriSource="Graphics\Separator.png" />
         <Color x:Key="Silver" A="255"  R="127"  G="127" B="127" />
         <Color x:Key="Black" A="255"  R="0"  G="0" B="0" />
         <!--各種コントロール用Buttonのスタイル-->
