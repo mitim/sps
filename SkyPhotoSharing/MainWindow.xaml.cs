@@ -215,8 +215,12 @@ namespace SkyPhotoSharing
         {
             ScaleTransform sc = ((TransformGroup)ViewMap.LayoutTransform).Children.ElementAt(0) as ScaleTransform;
             Point omp = e.GetPosition(ViewMap);
-            ScaleChangeByWheel(sc, e.Delta);
-            CorrectScrollAtMouse(e.GetPosition(ViewWindow), omp, sc.ScaleX);
+            var ns = Effector.Scale(sc.ScaleX, e.Delta);
+            sc.ScaleX = ns;
+            sc.ScaleY = ns;
+            var np = Effector.CorrectScalePoint(e.GetPosition(ViewWindow), omp, ns);
+            ViewWindow.ScrollToHorizontalOffset(np.X);
+            ViewWindow.ScrollToVerticalOffset(np.Y);
         }
 
         #endregion
@@ -309,7 +313,7 @@ namespace SkyPhotoSharing
         private void OnScaleToFit(object sender, RoutedEventArgs e)
         {
             Photo p = Thumbnails.Items.CurrentItem as Photo;
-            p.Scale = CalcFitScale(p);
+            p.Scale = Effector.ScaleToFitSize(p, ViewWindow.ActualWidth, ViewWindow.ActualHeight);
         }
 
         #endregion
@@ -374,37 +378,6 @@ namespace SkyPhotoSharing
 
         private ImageEffector Effector { get; set; }
 
-        private const double ZOOM_DELTA = 0.05;
-
-        private void ScaleChangeByWheel(ScaleTransform scale, double delta)
-        {
-            double v = ZoomDelta(delta);
-            double ns = scale.ScaleX + v;
-            if (ns > ZOOM_DELTA)
-            {
-                scale.ScaleX = ns;
-                scale.ScaleY = ns;
-            }
-            else
-            {
-                scale.ScaleX = ZOOM_DELTA;
-                scale.ScaleY = ZOOM_DELTA;
-            }
-        }
-
-        private void CorrectScrollAtMouse(Point viewPos, Point mapPos, double mapScale)
-        {
-            double x = mapPos.X * mapScale - viewPos.X;
-            double y = mapPos.Y * mapScale - viewPos.Y;
-            ViewWindow.ScrollToHorizontalOffset(x);
-            ViewWindow.ScrollToVerticalOffset(y);
-        }
-
-        private double ZoomDelta(double delta)
-        {
-            return delta > 0 ? ZOOM_DELTA : -ZOOM_DELTA;
-        }
-
         private void ResetViewTransforms(Photo p)
         {
             if (p == null) return;
@@ -416,18 +389,6 @@ namespace SkyPhotoSharing
         {
             Photo p = Thumbnails.Items.CurrentItem as Photo;
             PhotoList.Remove(p);
-        }
-
-        private double CalcFitScale(Photo p)
-        {
-            var xs = ViewWindow.ActualWidth / p.Image.PixelWidth;
-            var ys = ViewWindow.ActualHeight / p.Image.PixelHeight;
-            var ns = xs <= ys ? xs : ys;
-            if (ns > 1.0)
-            {
-                ns = 1.0;
-            }
-            return ns;
         }
     }
 }

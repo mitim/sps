@@ -4,11 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Media;
 
 namespace SkyPhotoSharing
 {
     class ImageEffector
     {
+
+        private const double ZOOM_DELTA = 0.05;
+
         public ImageEffector()
         {
             Mode = EffectMode.NOEFFECT;
@@ -20,6 +24,36 @@ namespace SkyPhotoSharing
         public EffectMode Mode { get; protected set; }
 
         protected Point PrevPoint { get; set; } 
+
+        public double Scale(double scale, double delta)
+        {
+            Mode = EffectMode.SCALE;
+            double ns = scale + ZoomDelta(delta);
+            if (ns > ZOOM_DELTA)
+            {
+                return ns;
+            }
+            else
+            {
+                return ZOOM_DELTA;
+            }
+        }
+
+        public Point CorrectScalePoint(Point viewPos, Point mapPos, double mapScale)
+        {
+            if (Mode != EffectMode.SCALE) return viewPos;
+            double x = mapPos.X * mapScale - viewPos.X;
+            double y = mapPos.Y * mapScale - viewPos.Y;
+            return new Point(x, y);
+        }
+
+        public double ScaleToFitSize(Photo p,double actualX, double actualY)
+        {
+            var xs = actualX / p.Image.PixelWidth;
+            var ys = actualY / p.Image.PixelHeight;
+            var ns = xs <= ys ? xs : ys;
+            return ns <= 1.0 ? ns : 1.0;
+        }
 
         public void PrevScroll(Point point)
         {
@@ -58,5 +92,10 @@ namespace SkyPhotoSharing
             return Math.Atan2(y, x) % 2;
         }
  
+
+        private double ZoomDelta(double delta)
+        {
+            return delta > 0 ? ZOOM_DELTA : -ZOOM_DELTA;
+        }
     }
 }
