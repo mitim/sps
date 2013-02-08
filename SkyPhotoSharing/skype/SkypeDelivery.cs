@@ -260,8 +260,7 @@ namespace SkyPhotoSharing
                     ThrowAndIntervalize(new FileRecieveException(Target));
                 }
                 log.Debug("Recieved data size:" + s.Length);
-                var r = s.ToString();
-                return r;
+                return s.ToString();
             });
         }
 
@@ -276,7 +275,7 @@ namespace SkyPhotoSharing
         private void WaitForInterval(State nextState)
         {
             log.Debug("Wait for interval");
-            UsingTimeoutCheck(3, () =>
+            UsingIntervalTimeoutCheck(5, () =>
             { 
                 while (ConnectionState != State.INTERVAL) SleepThread();
                 ConnectionState = nextState;
@@ -289,7 +288,7 @@ namespace SkyPhotoSharing
         {
             log.Debug("Wait a reply from " + Target.Handle);
             String r = "";
-            UsingTimeoutCheck(1, () =>
+            UsingTimeoutCheck(5, () =>
             { 
                 while (!ReceivedCommand.TryDequeue(out r)) SleepThread();
                 return true;
@@ -302,7 +301,7 @@ namespace SkyPhotoSharing
         {
             log.Debug("Wait a packet from " + Target.Handle);
             String r = "";
-            UsingTimeoutCheck(1, () =>
+            UsingTimeoutCheck(() =>
             { 
                 while (!ReceivedPacket.TryDequeue(out r)) SleepThread();
                 return true;
@@ -327,7 +326,7 @@ namespace SkyPhotoSharing
         private void SendAllData(string json, int length)
         {
             log.Debug("Start send json to " + Target.Handle + ".");
-            UsingTimeoutCheck(1, () =>
+            UsingTimeoutCheck(() =>
             {
                 for (int i = 0; i < length; i += PACKET_SIZE)
                 {
@@ -368,6 +367,11 @@ namespace SkyPhotoSharing
             throw ex;
         }
 
+        private bool UsingTimeoutCheck(Func<bool> exec)
+        {
+            return UsingTimeoutCheck(1, exec);
+        }
+
         private bool UsingTimeoutCheck(int minute, Func<bool> exec)
         {
             var ch = StartTimeoutCheck(minute);
@@ -376,11 +380,20 @@ namespace SkyPhotoSharing
             return r;
         }
 
+        private bool UsingIntervalTimeoutCheck(int minute, Func<bool> exec)
+        {
+            var ch = StartTimeoutCheck(minute, false);
+            var r = exec();
+            StopTimeoutCheck(ch);
+            return r;
+        }
 
-        private Timer StartTimeoutCheck(int minute = 1)
+
+        private Timer StartTimeoutCheck(int minute, bool intervalize = true)
         {
             long w = 60000 * minute;
             var c = new Tick();
+            c.Intervalize = intervalize;
             var t = new Timer(OnRaiseTimeout, c, w, w);
             c.Sender = t;
             return t;
@@ -393,9 +406,17 @@ namespace SkyPhotoSharing
 
         private void OnRaiseTimeout(object tick)
         {
-            StopTimeoutCheck(((Tick)tick).Sender);
+            Tick t = (Tick)tick;
+            StopTimeoutCheck(t.Sender);
             log.Debug("Transfer timeout. target:" + Target.Handle);
-            ThrowAndIntervalize( new FileTimeoutException(Target, StateText[ConnectionState]));
+            var ex = new FileTimeoutException(Target, StateText[ConnectionState]);
+            if (t.Intervalize) {
+                ThrowAndIntervalize(ex);
+            }
+            else
+            {
+                throw ex;
+            }
         }
 
         private void OnNoticeAlive(object sender, EventArgs e)
@@ -409,6 +430,7 @@ namespace SkyPhotoSharing
         private class Tick
         {
             public Timer Sender { get; set; }
+            public bool Intervalize { get; set; }
         }
 
     }

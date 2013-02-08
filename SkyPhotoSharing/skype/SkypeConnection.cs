@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using SKYPE4COMLib;
 using System.Threading;
+using System.Collections.Concurrent;
+using System.Windows.Threading;
 
 namespace SkyPhotoSharing
 {
@@ -54,11 +56,20 @@ namespace SkyPhotoSharing
             }
         }
 
+        private DispatcherTimer _writeControler;
+
         private SkypeConnection()
         {
             log.Debug("Connection create start.");
+            InitializeWriteControler();
             if (Skype.Client.IsRunning) return;
             Skype.Client.Start();
+        }
+
+        ~SkypeConnection()
+        {
+            _writeControler.Stop();
+            _writeControler = null;
         }
 
         public bool WaitSkypeRunning()
@@ -89,14 +100,24 @@ namespace SkyPhotoSharing
             c.Disconnect();
         }
 
+        private class SkyPacket 
+        {
+            public string Handle { get; private set; }
+            public string Data { get; private set; }
+
+            public SkyPacket(string handle, string data)
+            {
+                Handle = handle;
+                Data = data;
+            }
+        }
+
+        private ConcurrentQueue<SkyPacket> _packets = new ConcurrentQueue<SkyPacket>();
+
         public void WritePacket(string data, Enlister partner)
         {
-            if (log.IsDebugEnabled)
-            {
-                log.Debug("WritePacket to user. :" + partner.Handle + " data-length:" + data.Length);
-                if (data.Length < 50) log.Debug("data:" + data);
-            }
-            GetConnectingStream(partner.Handle).Write(data);
+            _packets.Enqueue(new SkyPacket(partner.Handle, data));
+            log.Debug("Write packet scheduled. handle:" + partner.Handle + " size:" + data.Length);
         }
 
         public void PostChatMessage(string handle, string message)
@@ -156,6 +177,31 @@ namespace SkyPhotoSharing
                 if (s.Handle.StartsWith(handle)) return s;
             }
             return null;
+        }
+
+        private void InitializeWriteControler()
+        {
+            _writeControler = new DispatcherTimer();
+            _writeControler.Interval = TimeSpan.FromMilliseconds(100);
+            _writeControler.Tick += OnWritePackets;
+            _writeControler.Start();
+            log.Debug("Write controler initialized. start=" + _writeControler.IsEnabled);
+        }
+
+        private void WritePacket(SkyPacket packet)
+        {
+            if (log.IsDebugEnabled)
+            {
+                log.Debug("WritePacket to user. :" + packet.Handle + " data-length:" + packet.Data.Length);
+                if (packet.Data.Length < 50) log.Debug("data:" + packet.Data);
+            }
+            GetConnectingStream(packet.Handle).Write(packet.Data);
+        }
+
+        private string ParseHandle(string t)
+        {
+            var p = t.LastIndexOf(":");
+            return t.Substring(0, p);
         }
         
         #region Skypeイベントハンドラ
@@ -227,12 +273,15 @@ namespace SkyPhotoSharing
             throw new SkypeApiException(s);
         }
 
-        private string ParseHandle(string t)
+        private void OnWritePackets(object sender, EventArgs e)
         {
-            var p = t.LastIndexOf(":");
-            return t.Substring(0, p);
+            SkyPacket p;
+            while (_packets.TryDequeue(out p) == true)
+            {
+                WritePacket(p);
+            }
         }
-
+ 
         #endregion
     }
 }
