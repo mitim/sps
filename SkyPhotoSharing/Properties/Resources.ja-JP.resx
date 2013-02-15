@@ -150,11 +150,35 @@
   <data name="MESSAGE_ERROR_OCCURRED_CAPTION" xml:space="preserve">
     <value>おおっと！:{0}</value>
   </data>
+  <data name="TEXT_FILE" xml:space="preserve">
+    <value>画像ファイル</value>
+  </data>
   <data name="TIP_ADD_USER" xml:space="preserve">
     <value>画像共有する知合いを追加</value>
   </data>
   <data name="TIP_CLOSE_PHOTO" xml:space="preserve">
     <value>この画像を閉じる</value>
+  </data>
+  <data name="TIP_FLIP_HORIZONTAL" xml:space="preserve">
+    <value>水平方向に反転</value>
+  </data>
+  <data name="TIP_FLIP_VERTICAL" xml:space="preserve">
+    <value>垂直方向に反転</value>
+  </data>
+  <data name="TIP_OPEN" xml:space="preserve">
+    <value>画像ファイルを選択</value>
+  </data>
+  <data name="TIP_ROTATE_0" xml:space="preserve">
+    <value>回転をキャンセル</value>
+  </data>
+  <data name="TIP_ROTATE_180" xml:space="preserve">
+    <value>180度回転</value>
+  </data>
+  <data name="TIP_ROTATE_270" xml:space="preserve">
+    <value>左に90度回転</value>
+  </data>
+  <data name="TIP_ROTATE_90" xml:space="preserve">
+    <value>右に90度回転</value>
   </data>
   <data name="TIP_SAVE" xml:space="preserve">
     <value>保存</value>
@@ -164,5 +188,8 @@
   </data>
   <data name="TIP_SCALE_ORIGIN" xml:space="preserve">
     <value>等倍表示</value>
+  </data>
+  <data name="TITLE_FILE_OPEN" xml:space="preserve">
+    <value>画像を開く</value>
   </data>
 </root>

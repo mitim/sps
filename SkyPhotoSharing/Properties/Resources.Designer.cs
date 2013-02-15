@@ -160,6 +160,15 @@ namespace SkyPhotoSharing.Properties {
         }
         
         /// <summary>
+        ///   Photo files に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string TEXT_FILE {
+            get {
+                return ResourceManager.GetString("TEXT_FILE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Add photo sharing user に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string TIP_ADD_USER {
@@ -174,6 +183,69 @@ namespace SkyPhotoSharing.Properties {
         public static string TIP_CLOSE_PHOTO {
             get {
                 return ResourceManager.GetString("TIP_CLOSE_PHOTO", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Horizontally flip に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string TIP_FLIP_HORIZONTAL {
+            get {
+                return ResourceManager.GetString("TIP_FLIP_HORIZONTAL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Vertically flip に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string TIP_FLIP_VERTICAL {
+            get {
+                return ResourceManager.GetString("TIP_FLIP_VERTICAL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Select photo files に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string TIP_OPEN {
+            get {
+                return ResourceManager.GetString("TIP_OPEN", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Cancel rotate に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string TIP_ROTATE_0 {
+            get {
+                return ResourceManager.GetString("TIP_ROTATE_0", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Rotate to 180 degree に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string TIP_ROTATE_180 {
+            get {
+                return ResourceManager.GetString("TIP_ROTATE_180", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Rotate to 270 degree に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string TIP_ROTATE_270 {
+            get {
+                return ResourceManager.GetString("TIP_ROTATE_270", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Rotate to 90 degree に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string TIP_ROTATE_90 {
+            get {
+                return ResourceManager.GetString("TIP_ROTATE_90", resourceCulture);
             }
         }
         
@@ -201,6 +273,15 @@ namespace SkyPhotoSharing.Properties {
         public static string TIP_SCALE_ORIGIN {
             get {
                 return ResourceManager.GetString("TIP_SCALE_ORIGIN", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Open photo files  に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string TITLE_FILE_OPEN {
+            get {
+                return ResourceManager.GetString("TITLE_FILE_OPEN", resourceCulture);
             }
         }
     }

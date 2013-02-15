@@ -9,6 +9,7 @@ using System.Windows.Controls.Primitives;
 using SKYPE4COMLib;
 using System.Threading;
 using System.IO;
+using System.Collections.Generic;
 
 namespace SkyPhotoSharing
 {
@@ -63,28 +64,7 @@ namespace SkyPhotoSharing
                 ForceCursor = true;
                 Cursor = Cursors.Wait;
                 string[] files = e.Data.GetData(DataFormats.FileDrop) as string[];
-                foreach (string p in files)
-                {
-                    log.Debug(p);
-                    try 
-                    {
-                        if (Photo.IsCoinsidable(p))
-                        {
-                            PhotoList.AddNewLocal(p);
-                            Thread.Sleep(100);
-                        }
-                    }
-                    catch(NotSupportedException ex)
-                    {
-                        log.Error(ex.Message, ex);
-                        MessageBox.Show(this, string.Format(Properties.Resources.ERROR_FILE_NOT_PHOTO, Path.GetFileName(p)), string.Format(Properties.Resources.MESSAGE_ERROR_OCCURRED_CAPTION, ex.GetType().ToString()));
-                        continue;
-                    }
-                }
-                Thumbnails.Items.MoveCurrentToLast();
-                Thumbnails.ScrollIntoView(Thumbnails.Items.CurrentItem);
-                ForceCursor = false;
-                Cursor = null;
+                AddFiles(files);
             }
             catch (ApplicationException ex)
             {
@@ -92,6 +72,7 @@ namespace SkyPhotoSharing
             }
             finally
             {
+                ForceCursor = false;
                 Cursor = null;
             }
 
@@ -131,6 +112,7 @@ namespace SkyPhotoSharing
             var p = PhotoList.GetSameItem(card.Message as SkypeMessageUniqueFile);
             if (p == null) return;
             Thumbnails.Items.MoveCurrentTo(p);
+            Thumbnails.ScrollIntoView(p);
         }
 
         #endregion
@@ -204,7 +186,9 @@ namespace SkyPhotoSharing
 
         private void View_SourceChanged(object sender, DataTransferEventArgs e)
         {
-            ResetViewTransforms(Thumbnails.SelectedItem as Photo);
+            var p = Thumbnails.SelectedItem as Photo;
+            if (p == null) return;
+            ResetViewTransforms(p);
         }
 
         #endregion
@@ -213,14 +197,12 @@ namespace SkyPhotoSharing
 
         private void View_OnScaleChange(object sender, MouseWheelEventArgs e)
         {
-            ScaleTransform sc = ((TransformGroup)ViewMap.LayoutTransform).Children.ElementAt(0) as ScaleTransform;
+            var p = Thumbnails.SelectedItem as Photo;
+            if (p == null) return;
             Point omp = e.GetPosition(ViewMap);
-            var ns = Effector.Scale(sc.ScaleX, e.Delta);
-            sc.ScaleX = ns;
-            sc.ScaleY = ns;
-            var np = Effector.CorrectScalePoint(e.GetPosition(ViewWindow), omp, ns);
-            ViewWindow.ScrollToHorizontalOffset(np.X);
-            ViewWindow.ScrollToVerticalOffset(np.Y);
+            Effector.Scale(p, e.Delta);
+            Effector.CorrectScaledOffset(p, e.GetPosition(ViewWindow), omp, ViewWindowRect);
+            ScrollToViewWindowOffsets(p);
         }
 
         #endregion
@@ -252,9 +234,10 @@ namespace SkyPhotoSharing
 
         private void View_OnScrollOver(object sender, MouseEventArgs e)
         {
-            var np = Effector.ScrollTo(ViewWindowOffset, e.GetPosition(ViewWindow));
-            ViewWindow.ScrollToHorizontalOffset(np.X);
-            ViewWindow.ScrollToVerticalOffset(np.Y);
+            var p = Thumbnails.SelectedItem as Photo;
+            if (p == null) return;
+            Effector.ScrollTo(p, e.GetPosition(ViewWindow), ViewWindowRect);
+            ScrollToViewWindowOffsets(p);
         }
 
         private void View_OnScrollLeave(object sender, MouseButtonEventArgs e)
@@ -266,7 +249,7 @@ namespace SkyPhotoSharing
         {
             var p = Thumbnails.SelectedItem as Photo;
             if (p == null) return;
-            p.ViewPosition = ViewWindowOffset;
+            p.WindowPosition = ViewWindowOffset;
         }
 
         #endregion
@@ -275,20 +258,27 @@ namespace SkyPhotoSharing
 
         private void View_OnRotateEnter(object sender, MouseEventArgs e)
         {
+            var p = Thumbnails.SelectedItem as Photo;
+            if (p == null) return;
             if (e.MiddleButton != MouseButtonState.Pressed) return;
             Effector.PrevRotate(e.GetPosition(ViewMap));
             ViewWindow.Cursor = HandGrabCursor;
+            ShowCenterScope(p);
         }
 
         private void View_OnRotateOver(object sender, MouseEventArgs e)
         {
             var p = Thumbnails.SelectedItem as Photo;
             if (p == null) return;
-            p.Rotate = Effector.RotateTo(p.Rotate, ViewMapSize, e.GetPosition(ViewMap));
+            Effector.RotateTo(p, ViewMapRect, e.GetPosition(ViewMap), ViewWindowRect);
+            var rtf = ((RotateTransform)((TransformGroup)ViewImage.RenderTransform).Children[0]);
+            log.Debug("rotate:" + rtf.Angle + " center:" + rtf.CenterX + "," + rtf.CenterY);
+            log.Debug("scroll:" + ViewWindow.HorizontalOffset + "," + ViewWindow.VerticalOffset + " image:" + Canvas.GetTop(ViewImage) + "," + Canvas.GetLeft(ViewImage) + "," + ViewImage.ActualWidth + "," + ViewImage.ActualHeight);
         }
 
         private void View_OnRotateLeave(object sender, MouseButtonEventArgs e)
         {
+            HideCenterScope();
             ViewWindow.Cursor = HandOpenCursor;
         }
 
@@ -304,16 +294,82 @@ namespace SkyPhotoSharing
             PhotoList.UpdateControlFlags();
         }
 
+        private void OnOpenDialog(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var files = OpenPhotoFileDialog();
+                ForceCursor = true;
+                Cursor = Cursors.Wait;
+                AddFiles(files);
+            }
+            catch (ApplicationException ex)
+            {
+                MessageBox.Show(this, ex.Message, string.Format(Properties.Resources.MESSAGE_ERROR_OCCURRED_CAPTION, ex.GetType().ToString()));
+            }
+            finally
+            {
+                ForceCursor = false;
+                Cursor = null;
+            }
+        }
+
         private void OnScaleOrigin(object sender, RoutedEventArgs e)
         {
             Photo p = Thumbnails.Items.CurrentItem as Photo;
-            p.Scale = 1.0;
+            if (p == null) return;
+            Effector.ScaleToOriginalSize(p, ViewWindowRect);
+            ScrollToViewWindowOffsets(p);
         }
 
         private void OnScaleToFit(object sender, RoutedEventArgs e)
         {
             Photo p = Thumbnails.Items.CurrentItem as Photo;
-            p.Scale = Effector.ScaleToFitSize(p, ViewWindow.ActualWidth, ViewWindow.ActualHeight);
+            if (p == null) return;
+            Effector.ScaleToFitSize(p, ViewWindowRect);
+            ScrollToViewWindowOffsets(p);
+        }
+
+        private void OnRotateTo0(object sender, RoutedEventArgs e)
+        {
+            Photo p = Thumbnails.Items.CurrentItem as Photo;
+            if (p == null) return;
+            Effector.RotateTo(p, 0, ViewWindowRect);
+        }
+
+        private void OnRotateTo90(object sender, RoutedEventArgs e)
+        {
+            Photo p = Thumbnails.Items.CurrentItem as Photo;
+            if (p == null) return;
+            Effector.RotateTo(p, 90, ViewWindowRect);
+        }
+
+        private void OnRotateTo180(object sender, RoutedEventArgs e)
+        {
+            Photo p = Thumbnails.Items.CurrentItem as Photo;
+            if (p == null) return;
+            Effector.RotateTo(p, 180, ViewWindowRect);
+        }
+
+        private void OnRotateTo270(object sender, RoutedEventArgs e)
+        {
+            Photo p = Thumbnails.Items.CurrentItem as Photo;
+            if (p == null) return;
+            Effector.RotateTo(p, 270, ViewWindowRect);
+        }
+
+        private void OnFlipHorizontal(object sender, RoutedEventArgs e)
+        {
+            Photo p = Thumbnails.Items.CurrentItem as Photo;
+            if (p == null) return;
+            Effector.FlipHorizontal(p);
+        }
+
+        private void OnFlipVertical(object sender, RoutedEventArgs e)
+        {
+            Photo p = Thumbnails.Items.CurrentItem as Photo;
+            if (p == null) return;
+            Effector.FlipVertical(p);
         }
 
         #endregion
@@ -366,11 +422,32 @@ namespace SkyPhotoSharing
             }
         }
 
-        private Point ViewMapSize
+        private Size ViewWindowSize
         {
             get
             {
-                return new Point(ViewMap.Width, ViewMap.Height);
+                return new Size(ViewWindow.ActualWidth, ViewWindow.ActualHeight);
+            }
+        }
+
+        private Rect ViewMapRect
+        {
+            get
+            {
+                return new Rect(0, 0, ViewMap.ActualWidth, ViewMap.ActualHeight);
+            }
+        }
+
+        private Rect ViewWindowRect
+        {
+            get
+            {
+                return new Rect(
+                    ViewWindow.HorizontalOffset,
+                    ViewWindow.VerticalOffset,
+                    ViewWindow.ActualWidth,
+                    ViewWindow.ActualHeight
+                );
             }
         }
 
@@ -378,17 +455,87 @@ namespace SkyPhotoSharing
 
         private ImageEffector Effector { get; set; }
 
+        private void AddFiles(string[] files)
+        {
+            foreach (string p in files)
+            {
+                log.Debug(p);
+                try
+                {
+                    if (Photo.IsCoinsidable(p))
+                    {
+                        PhotoList.AddNewLocal(p);
+                        Thread.Sleep(100);
+                    }
+                }
+                catch (NotSupportedException ex)
+                {
+                    log.Error(ex.Message, ex);
+                    MessageBox.Show(this, string.Format(Properties.Resources.ERROR_FILE_NOT_PHOTO, Path.GetFileName(p)), string.Format(Properties.Resources.MESSAGE_ERROR_OCCURRED_CAPTION, ex.GetType().ToString()));
+                    continue;
+                }
+            }
+            Thumbnails.Items.MoveCurrentToLast();
+            Thumbnails.ScrollIntoView(Thumbnails.Items.CurrentItem);
+        }
+
         private void ResetViewTransforms(Photo p)
         {
             if (p == null) return;
-            ViewWindow.ScrollToHorizontalOffset(p.ViewPosition.X);
-            ViewWindow.ScrollToVerticalOffset(p.ViewPosition.Y);
+            SetVMapPoint(p);
+
+            Effector.InitializeViewPos(
+                p,
+                new Vector(ViewWindow.ActualWidth, ViewWindow.ActualHeight),
+                new Vector(p.MapSpan, p.MapSpan)
+            );
+            ScrollToViewWindowOffsets(p);
+        }
+
+        private void SetVMapPoint(Photo p)
+        {
+
+            Canvas.SetLeft(ViewImage, p.MapLeft);
+            Canvas.SetTop(ViewImage, p.MapTop);
+        }
+
+        private void ScrollToViewWindowOffsets(Photo p)
+        {
+            ViewWindow.ScrollToHorizontalOffset(p.WindowPosition.X);
+            ViewWindow.ScrollToVerticalOffset(p.WindowPosition.Y);
+        }
+
+        private void ShowCenterScope(Photo p)
+        {
+            Canvas.SetLeft(CenterScope, (p.MapLeft + p.CenterX) - 5);
+            Canvas.SetTop(CenterScope, (p.MapTop + p.CenterY) - 5);
+            CenterScope.Visibility = Visibility.Visible;
+        }
+
+        private void HideCenterScope()
+        {
+            CenterScope.Visibility = Visibility.Hidden;
         }
 
         private void RemovePhoto()
         {
             Photo p = Thumbnails.Items.CurrentItem as Photo;
             PhotoList.Remove(p);
+        }
+
+        private static string[] OpenPhotoFileDialog()
+        {
+            var od = new System.Windows.Forms.OpenFileDialog();
+            od.Multiselect = true;
+            od.CheckFileExists = true;
+            od.CheckPathExists = true;
+            od.Filter = Photo.SupportFilter;
+            od.DefaultExt = Photo.SUPPORT_EXT[0];
+            od.Title = Properties.Resources.TITLE_FILE_OPEN;
+            od.InitialDirectory = Configuration.Instance.SaveFolder;
+            var r = od.ShowDialog();
+            if (r != System.Windows.Forms.DialogResult.OK) return new string[0];
+            return od.FileNames;
         }
     }
 }

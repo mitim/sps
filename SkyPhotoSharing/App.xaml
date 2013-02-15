@@ -8,12 +8,22 @@
              Startup="Application_Startup"
              Exit="Application_Exit" >
     <Application.Resources>
+        <!-- リソースファイル -->
         <properties:Resources x:Key="Resources" />
+        <!-- 各種アイコン -->
         <BitmapImage x:Key="CloseIcon" UriSource="Graphics\PhotoClose.png" />
         <BitmapImage x:Key="AddUserIcon" UriSource="Graphics\AddUser.png" />
+        <BitmapImage x:Key="OpenIcon" UriSource="Graphics\OpenDialog.png" />
         <BitmapImage x:Key="SaveIcon" UriSource="Graphics\SavePicture.png" />
         <BitmapImage x:Key="ResizeOriginalIcon" UriSource="Graphics\ResizeOriginal.png" />
         <BitmapImage x:Key="ResizeToFitIcon" UriSource="Graphics\ResizeFit.png" />
+        <BitmapImage x:Key="RotateTo0Icon" UriSource="Graphics\Rotate360.png" />
+        <BitmapImage x:Key="RotateTo90Icon" UriSource="Graphics\RotateR.png" />
+        <BitmapImage x:Key="RotateTo180Icon" UriSource="Graphics\Rotate180.png" />
+        <BitmapImage x:Key="RotateTo270Icon" UriSource="Graphics\RotateL.png" />
+        <BitmapImage x:Key="FlipHorizontalIcon" UriSource="Graphics\FlipH.png" />
+        <BitmapImage x:Key="FlipVerticalIcon" UriSource="Graphics\FlipV.png" />
+        <!-- 色 -->
         <Color x:Key="Silver" A="255"  R="127"  G="127" B="127" />
         <Color x:Key="Black" A="255"  R="0"  G="0" B="0" />
         <!--各種コントロール用Buttonのスタイル-->

@@ -14,11 +14,28 @@ namespace SkyPhotoSharing
     class Photo : INotifyPropertyChanged
     {
         public static readonly string[] SUPPORT_EXT = { ".jpg", ".jpeg", ".bmp", ".png", ".tiff", ".gif" };
+        public static readonly Point UNINITIALIZED_POINT = new Point();
+        public static string SupportFilter 
+        {
+            get
+            {
+                var s = new StringBuilder(Properties.Resources.TEXT_FILE);
+                s.Append("|");
+                foreach (var ext in SUPPORT_EXT) {
+                    s.AppendFormat("*{0};", ext);
+                }
+                s.Remove(s.Length - 1, 1);
+                return s.ToString();
+            }
+        }
+
         private const int NO_DATA = -1;
         private const double DEFAULT_SCALE = 1.0;
         private const double DEFAULT_ROTATE = 0.0;
 
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        
+        #region コンストラクタ・デストラクタ
 
         protected Photo(Stream stm, string path, Enlister own)
         {
@@ -30,14 +47,30 @@ namespace SkyPhotoSharing
             BackGroundCenter = Colors.Silver;
             BackGroundBottom = Colors.Silver;
             BlendBackgroundColor();
-            _viewPosition = new Point(Image.Width / 2, 0);
+            _isSelected = false;
             _scale = DEFAULT_SCALE;
+            _rotate = DEFAULT_ROTATE;
             CenterX = Image.PixelWidth / 2;
             CenterY = Image.PixelHeight / 2;
-            _rotate = DEFAULT_ROTATE;
-            _isSelected = false;
+            MapSpan = (Image.PixelHeight < Image.PixelWidth) ? Image.PixelWidth * 2 : Image.PixelHeight * 2;
+            MapLeft = (MapSpan - Image.PixelWidth) / 2;
+            MapTop = (MapSpan - Image.PixelHeight) / 2;
+            _windowPosition = UNINITIALIZED_POINT;
+            _mapRect = new Rect
+            (
+                (MapSpan - Image.PixelWidth) / 2, 
+                (MapSpan - Image.PixelHeight) / 2, 
+                Image.PixelWidth, 
+                Image.PixelHeight
+            );
+            _flipVertical = 1;
+            _flipHorizontal = 1;
             log.Debug("Create new photo. File:" + FileName + " Size:" + Image.StreamSource.Length);
         }
+
+        #endregion
+
+        #region プロパティ
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected virtual void OnPropertyChanged(string name)
@@ -59,14 +92,27 @@ namespace SkyPhotoSharing
         public Color BackGroundBottom { get; protected set; }
         public double CenterX { get; protected set; }
         public double CenterY { get; protected set; }
-        private Point _viewPosition;
-        public Point ViewPosition 
+        public double MapSpan { get; protected set; }
+        public double MapLeft { get; protected set; }
+        public double MapTop { get; protected set; }
+        private Point _windowPosition;
+        public Point WindowPosition 
         {
-            get { return _viewPosition; }
+            get { return _windowPosition; }
             set
             {
-                _viewPosition = value;
+                _windowPosition = value;
                 OnPropertyChanged("ViewPosition");
+            }
+        }
+        private Rect _mapRect;
+        public Rect MapRect
+        {
+            get { return _mapRect; }
+            set
+            {
+                _mapRect = value;
+                OnPropertyChanged("ViewRect");
             }
         }
         private bool _isSelected;
@@ -99,6 +145,31 @@ namespace SkyPhotoSharing
                 OnPropertyChanged("Rotate");
             }
         }
+        private double _flipVertical;
+        public double FlipVertical
+        {
+            get { return _flipVertical; }
+            set
+            {
+                _flipVertical = value;
+                OnPropertyChanged("FlipVertical");
+            }
+        }
+        private double _flipHorizontal;
+        public double FlipHorizontal
+        {
+            get { return _flipHorizontal; }
+            set
+            {
+                _flipHorizontal = value;
+                OnPropertyChanged("FlipHorizontal");
+            }
+        }
+
+
+        #endregion
+
+        #region ファクトリメソッド
 
         public static Photo Create(string path, Enlister own)
         {
@@ -133,6 +204,8 @@ namespace SkyPhotoSharing
             p.CanSave = true;
             return p;
         }
+
+        #endregion
 
         public static bool IsCoinsidable(string path)
         {

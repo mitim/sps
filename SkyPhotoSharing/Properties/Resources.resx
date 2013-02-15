@@ -150,11 +150,35 @@
   <data name="MESSAGE_ERROR_OCCURRED_CAPTION" xml:space="preserve">
     <value>Oops!!: {0}</value>
   </data>
+  <data name="TEXT_FILE" xml:space="preserve">
+    <value>Photo files</value>
+  </data>
   <data name="TIP_ADD_USER" xml:space="preserve">
     <value>Add photo sharing user</value>
   </data>
   <data name="TIP_CLOSE_PHOTO" xml:space="preserve">
     <value>Close this photo</value>
+  </data>
+  <data name="TIP_FLIP_HORIZONTAL" xml:space="preserve">
+    <value>Horizontally flip</value>
+  </data>
+  <data name="TIP_FLIP_VERTICAL" xml:space="preserve">
+    <value>Vertically flip</value>
+  </data>
+  <data name="TIP_OPEN" xml:space="preserve">
+    <value>Select photo files</value>
+  </data>
+  <data name="TIP_ROTATE_0" xml:space="preserve">
+    <value>Cancel rotate</value>
+  </data>
+  <data name="TIP_ROTATE_180" xml:space="preserve">
+    <value>Rotate to 180 degree</value>
+  </data>
+  <data name="TIP_ROTATE_270" xml:space="preserve">
+    <value>Rotate to 270 degree</value>
+  </data>
+  <data name="TIP_ROTATE_90" xml:space="preserve">
+    <value>Rotate to 90 degree</value>
   </data>
   <data name="TIP_SAVE" xml:space="preserve">
     <value>Save to local</value>
@@ -164,5 +188,8 @@
   </data>
   <data name="TIP_SCALE_ORIGIN" xml:space="preserve">
     <value>Return to original size</value>
+  </data>
+  <data name="TITLE_FILE_OPEN" xml:space="preserve">
+    <value>Open photo files </value>
   </data>
 </root>
